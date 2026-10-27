@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#dce6e6" />
+    <meta
+      name="description"
+      content="Landfold 地景志，以真实摄影、可点击的地景观察与有来源的解释，探索土地、水与人的联系。"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Landfold · 地景志" />
+    <meta
+      property="og:description"
+      content="山水之间，生活有迹。循着地景的纹理，读懂一片土地。"
+    />
+    <meta property="og:url" content="https://sharkerswag.github.io/Landfold/" />
+    <meta
+      property="og:image"
+      content="https://sharkerswag.github.io/Landfold/assets/share-preview.png"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="preload"
+      as="image"
+      href="assets/yuanyang-terraces-charrine-liu.jpg"
+    />
+    <script type="module" src="app.js"></script>
+    <title>Landfold · 地景志</title>
+  </head>
+  <body>
+    <a href="#main" class="skip-link">跳到地景内容</a>
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="Landfold 地景志首页">
+        <svg class="brand-glyph" viewBox="0 0 36 42" aria-hidden="true">
+          <path d="M3 32C8 27 5 12 16 8s16 6 17 13-3 12-13 14S8 39 3 32Z" />
+          <path d="M8 29c4-4 3-13 10-15s10 4 10 9-3 7-9 8-7 3-11-2Z" />
+          <path d="M13 26c3-3 2-6 6-7s5 3 4 5-6 4-10 2Z" />
+        </svg>
+        <span
+          ><span class="brand-name" lang="en">Landfold</span
+          ><span class="brand-sub">地景志 / A LANDSCAPE JOURNAL</span></span
+        >
+      </a>
+      <nav class="header-nav" aria-label="主导航">
+        <button class="active" type="button" data-action="home">
+          地景图志
+        </button>
+        <button type="button" data-action="notes">
+          观察札记<sup id="note-count">0</sup>
+        </button>
+        <button class="nav-about" type="button" data-action="about">
+          关于 Landfold
+        </button>
+      </nav>
+      <div class="header-right">
+        <span class="edition">中国 · 云南<br />山地与人居 / 001</span
+        ><button
+          type="button"
+          class="round-button"
+          data-action="read"
+          aria-label="阅读当前地景解读"
+        >
+          读
+        </button>
+      </div>
+    </header>
+
+    <main id="main" class="landscape" aria-label="元阳梯田地景图志">
+      <div class="scene" id="scene">
+        <img
+          class="scene-photo"
+          id="scene-photo"
+          src="assets/yuanyang-terraces-charrine-liu.jpg"
+          width="2048"
+          height="1365"
+          fetchpriority="high"
+          alt="云南元阳的真实摄影：层层蓄水的梯田映着天空，远处山峦在雾气中逐层淡去。"
+        />
+        <span class="scene-hint">真实摄影 / 点击编号，开始观察</span>
+        <button
+          type="button"
+          class="pin"
+          data-topic="terraces"
+          aria-label="观察点 01：梯田的纹理"
+          aria-pressed="true"
+        >
+          <span class="pin-number">01</span
+          ><span class="pin-label">梯田的纹理</span>
+        </button>
+        <button
+          type="button"
+          class="pin"
+          data-topic="water"
+          aria-label="观察点 02：水面的光"
+          aria-pressed="false"
+        >
+          <span class="pin-number">02</span
+          ><span class="pin-label">水面的光</span>
+        </button>
+        <button
+          type="button"
+          class="pin"
+          data-topic="forest"
+          aria-label="观察点 03：林与田"
+          aria-pressed="false"
+        >
+          <span class="pin-number">03</span
+          ><span class="pin-label">林与田</span>
+        </button>
+        <button
+          type="button"
+          class="pin"
+          data-topic="people"
+          aria-label="观察点 04：人的痕迹"
+          aria-pressed="false"
+        >
+          <span class="pin-number">04</span
+          ><span class="pin-label">人的痕迹</span>
+        </button>
+        <span class="scene-credit"
+          >PHOTOGRAPH ©
+          <a
+            href="https://commons.wikimedia.org/wiki/File:The_Terrace_Of_Yuanyang_China_(102441505).jpeg"
+            target="_blank"
+            rel="noreferrer"
+            >Charrine Liu</a
+          ><br /><a
+            href="https://creativecommons.org/licenses/by-sa/3.0/"
+            target="_blank"
+            rel="noreferrer"
+            >CC BY-SA 3.0</a
+          >
+          · 原图保留，版式裁切</span
+        >
+        <div class="scene-controls">
+          <button type="button" data-action="annotations" aria-pressed="true">
+            观察标注</button
+          ><button type="button" data-action="photo">展开原图 ↗</button>
+        </div>
+      </div>
+
+      <div class="cover-title">
+        <p class="eyebrow">LANDSCAPE JOURNAL / 云南 · 元阳</p>
+        <h1>山水之间<br /><span>生活有迹</span></h1>
+        <p class="title-small">循着地景的纹理，读懂一片土地。</p>
+      </div>
+      <p class="side-writing">山地与人居　第一篇</p>
+      <aside class="observation-panel" aria-label="当前地景观察">
+        <div class="mobile-topics" role="group" aria-label="选择观察主题">
+          <button type="button" data-topic="terraces" aria-pressed="true">
+            梯田的纹理</button
+          ><button type="button" data-topic="water" aria-pressed="false">
+            水面的光</button
+          ><button type="button" data-topic="forest" aria-pressed="false">
+            林与田</button
+          ><button type="button" data-topic="people" aria-pressed="false">
+            人的痕迹
+          </button>
+        </div>
+        <span class="eyebrow"
+          ><span id="topic-number">01</span> / 地景观察</span
+        >
+        <h2 id="topic-title" aria-live="polite">沿着山势，一层一层</h2>
+        <p class="detail-copy" id="topic-summary">
+          照片里的田埂沿坡面层叠展开。顺着弧线看，耕地的尺度、坡地的起伏，便逐渐有了可辨认的秩序。
+        </p>
+        <div class="panel-tools">
+          <button type="button" data-action="save" id="save-note">
+            记入札记 ＋</button
+          ><button type="button" data-action="read">阅读全文 ↗</button>
+        </div>
+      </aside>
+      <noscript
+        ><p class="noscript-note">
+          请开启 JavaScript
+          以使用观察标注与阅读功能。完整照片仍可通过“摄影来源”链接查看。
+        </p></noscript
+      >
+    </main>
+
+    <dialog
+      class="reading-dialog"
+      id="reading-dialog"
+      aria-labelledby="dialog-title"
+    >
+      <div class="dialog-shell">
+        <header class="dialog-top">
+          <span class="eyebrow" id="dialog-label">Landfold / 地景阅读</span
+          ><button
+            type="button"
+            data-action="close"
+            class="close-button"
+            aria-label="关闭阅读面板"
+          >
+            ×
+          </button>
+        </header>
+        <div id="dialog-body"></div>
+      </div>
+    </dialog>
+    <dialog
+      class="photo-dialog"
+      id="photo-dialog"
+      aria-labelledby="photo-title"
+    >
+      <header>
+        <span id="photo-title">云南 · 元阳 / 完整摄影原图</span
+        ><button
+          type="button"
+          data-action="close-photo"
+          class="close-button"
+          aria-label="关闭完整照片"
+        >
+          ×
+        </button>
+      </header>
+      <img id="full-photo" alt="" />
+      <footer id="full-photo-credit"></footer>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
