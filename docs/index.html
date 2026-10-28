@@ -22,6 +22,14 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="journal.css" />
+    <link
+      rel="preload"
+      as="font"
+      href="assets/fonts/noto-serif-sc-regular-subset.ttf"
+      type="font/ttf"
+      crossorigin
+    />
     <link
       rel="preload"
       as="image"
@@ -45,9 +53,8 @@
         >
       </a>
       <nav class="header-nav" aria-label="主导航">
-        <button class="active" type="button" data-action="home">
-          地景图志
-        </button>
+        <a class="active" href="#journal">本期图志</a>
+        <a class="nav-relations" href="#connections">地景关系</a>
         <button type="button" data-action="notes">
           观察札记<sup id="note-count">0</sup>
         </button>
@@ -68,117 +75,563 @@
       </div>
     </header>
 
-    <main id="main" class="landscape" aria-label="元阳梯田地景图志">
-      <div class="scene" id="scene">
-        <img
-          class="scene-photo"
-          id="scene-photo"
-          src="assets/yuanyang-terraces-charrine-liu.jpg"
-          width="2048"
-          height="1365"
-          fetchpriority="high"
-          alt="云南元阳的真实摄影：层层蓄水的梯田映着天空，远处山峦在雾气中逐层淡去。"
-        />
-        <span class="scene-hint">真实摄影 / 点击编号，开始观察</span>
-        <button
-          type="button"
-          class="pin"
-          data-topic="terraces"
-          aria-label="观察点 01：梯田的纹理"
-          aria-pressed="true"
-        >
-          <span class="pin-number">01</span
-          ><span class="pin-label">梯田的纹理</span>
-        </button>
-        <button
-          type="button"
-          class="pin"
-          data-topic="water"
-          aria-label="观察点 02：水面的光"
-          aria-pressed="false"
-        >
-          <span class="pin-number">02</span
-          ><span class="pin-label">水面的光</span>
-        </button>
-        <button
-          type="button"
-          class="pin"
-          data-topic="forest"
-          aria-label="观察点 03：林与田"
-          aria-pressed="false"
-        >
-          <span class="pin-number">03</span
-          ><span class="pin-label">林与田</span>
-        </button>
-        <button
-          type="button"
-          class="pin"
-          data-topic="people"
-          aria-label="观察点 04：人的痕迹"
-          aria-pressed="false"
-        >
-          <span class="pin-number">04</span
-          ><span class="pin-label">人的痕迹</span>
-        </button>
-        <span class="scene-credit"
-          >PHOTOGRAPH ©
-          <a
-            href="https://commons.wikimedia.org/wiki/File:The_Terrace_Of_Yuanyang_China_(102441505).jpeg"
-            target="_blank"
-            rel="noreferrer"
-            >Charrine Liu</a
-          ><br /><a
-            href="https://creativecommons.org/licenses/by-sa/3.0/"
-            target="_blank"
-            rel="noreferrer"
-            >CC BY-SA 3.0</a
+    <main id="main">
+      <section id="cover" class="landscape" aria-label="元阳梯田地景图志封面">
+        <div class="scene" id="scene">
+          <img
+            class="scene-photo"
+            id="scene-photo"
+            src="assets/yuanyang-terraces-charrine-liu.jpg"
+            width="2048"
+            height="1365"
+            fetchpriority="high"
+            alt="云南元阳的真实摄影：层层蓄水的梯田映着天空，远处山峦在雾气中逐层淡去。"
+          />
+          <span class="scene-hint">真实摄影 / 点击编号，开始观察</span>
+          <button
+            type="button"
+            class="pin"
+            data-topic="terraces"
+            aria-label="观察点 01：梯田的纹理"
+            aria-pressed="true"
           >
-          · 原图保留，版式裁切</span
-        >
-        <div class="scene-controls">
-          <button type="button" data-action="annotations" aria-pressed="true">
-            观察标注</button
-          ><button type="button" data-action="photo">展开原图 ↗</button>
+            <span class="pin-number">01</span
+            ><span class="pin-label">梯田的纹理</span>
+          </button>
+          <button
+            type="button"
+            class="pin"
+            data-topic="water"
+            aria-label="观察点 02：水面的光"
+            aria-pressed="false"
+          >
+            <span class="pin-number">02</span
+            ><span class="pin-label">水面的光</span>
+          </button>
+          <button
+            type="button"
+            class="pin"
+            data-topic="forest"
+            aria-label="观察点 03：林与田"
+            aria-pressed="false"
+          >
+            <span class="pin-number">03</span
+            ><span class="pin-label">林与田</span>
+          </button>
+          <button
+            type="button"
+            class="pin"
+            data-topic="people"
+            aria-label="观察点 04：人的痕迹"
+            aria-pressed="false"
+          >
+            <span class="pin-number">04</span
+            ><span class="pin-label">人的痕迹</span>
+          </button>
+          <span class="scene-credit"
+            >PHOTOGRAPH ©
+            <a
+              href="https://commons.wikimedia.org/wiki/File:The_Terrace_Of_Yuanyang_China_(102441505).jpeg"
+              target="_blank"
+              rel="noreferrer"
+              >Charrine Liu</a
+            ><br /><a
+              href="https://creativecommons.org/licenses/by-sa/3.0/"
+              target="_blank"
+              rel="noreferrer"
+              >CC BY-SA 3.0</a
+            >
+            · 原图保留，版式裁切</span
+          >
+          <div class="scene-controls">
+            <button type="button" data-action="annotations" aria-pressed="true">
+              观察标注</button
+            ><button type="button" data-action="photo">展开原图 ↗</button>
+          </div>
         </div>
+
+        <div class="cover-title">
+          <p class="eyebrow">LANDSCAPE JOURNAL / 云南 · 元阳</p>
+          <h1>山水之间<br /><span>生活有迹</span></h1>
+          <p class="title-small">循着地景的纹理，读懂一片土地。</p>
+        </div>
+        <p class="side-writing">山地与人居　第一篇</p>
+        <a class="turn-page" href="#journal"
+          ><span>翻开这片山水</span><span aria-hidden="true">↓</span></a
+        >
+        <aside class="observation-panel" aria-label="当前地景观察">
+          <div class="mobile-topics" role="group" aria-label="选择观察主题">
+            <button type="button" data-topic="terraces" aria-pressed="true">
+              梯田的纹理</button
+            ><button type="button" data-topic="water" aria-pressed="false">
+              水面的光</button
+            ><button type="button" data-topic="forest" aria-pressed="false">
+              林与田</button
+            ><button type="button" data-topic="people" aria-pressed="false">
+              人的痕迹
+            </button>
+          </div>
+          <span class="eyebrow"
+            ><span id="topic-number">01</span> / 地景观察</span
+          >
+          <h2 id="topic-title" aria-live="polite">沿着山势，一层一层</h2>
+          <p class="detail-copy" id="topic-summary">
+            照片里的田埂沿坡面层叠展开。顺着弧线看，耕地的尺度、坡地的起伏，便逐渐有了可辨认的秩序。
+          </p>
+          <div class="panel-tools">
+            <button type="button" data-action="save" id="save-note">
+              记入札记 ＋</button
+            ><button type="button" data-action="read">阅读全文 ↗</button>
+          </div>
+        </aside>
+        <noscript
+          ><p class="noscript-note">
+            请开启 JavaScript
+            以使用观察标注与阅读功能。完整照片仍可通过“摄影来源”链接查看。
+          </p></noscript
+        >
+      </section>
+
+      <div class="journal-bar" aria-label="本期目录">
+        <a class="journal-wordmark" href="#cover"
+          >Landfold<span>地景志</span></a
+        >
+        <nav aria-label="篇章导航">
+          <a href="#journal" data-chapter="journal">01 <span>山地序章</span></a>
+          <a href="#connections" data-chapter="connections"
+            >02 <span>地景关系</span></a
+          >
+          <a href="#folio" data-chapter="folio">03 <span>光与稻色</span></a>
+          <a href="#observations" data-chapter="observations"
+            >04 <span>细看一处</span></a
+          >
+        </nav>
+        <button type="button" data-action="notes" aria-label="打开观察札记">
+          札记 ↗
+        </button>
+        <span
+          class="reading-progress"
+          id="reading-progress"
+          aria-hidden="true"
+        ></span>
       </div>
 
-      <div class="cover-title">
-        <p class="eyebrow">LANDSCAPE JOURNAL / 云南 · 元阳</p>
-        <h1>山水之间<br /><span>生活有迹</span></h1>
-        <p class="title-small">循着地景的纹理，读懂一片土地。</p>
-      </div>
-      <p class="side-writing">山地与人居　第一篇</p>
-      <aside class="observation-panel" aria-label="当前地景观察">
-        <div class="mobile-topics" role="group" aria-label="选择观察主题">
-          <button type="button" data-topic="terraces" aria-pressed="true">
-            梯田的纹理</button
-          ><button type="button" data-topic="water" aria-pressed="false">
-            水面的光</button
-          ><button type="button" data-topic="forest" aria-pressed="false">
-            林与田</button
-          ><button type="button" data-topic="people" aria-pressed="false">
-            人的痕迹
+      <section
+        class="journal-opening paper-section"
+        id="journal"
+        aria-labelledby="opening-title"
+      >
+        <div class="section-kicker">
+          <span>FIELD JOURNAL / 001</span><span>中国 · 云南 · 元阳</span>
+        </div>
+        <div class="opening-heading">
+          <div>
+            <p class="eyebrow">第一篇 / 山地与人居</p>
+            <h2 id="opening-title">一面山坡，<br />不止一层风景。</h2>
+          </div>
+          <div class="opening-intro">
+            <span class="small-rule"></span>
+            <p>
+              第一眼，是山的轮廓。<br />再看，是水的光泽。<br />目光停留得更久一些，<br />便看见生活的形状。
+            </p>
+            <span class="eyebrow">READ THE LAND, SLOWLY.</span>
+          </div>
+        </div>
+        <div class="opening-spread">
+          <figure class="village-figure">
+            <button
+              type="button"
+              class="image-open"
+              data-photo="village"
+              aria-label="展开巴达方向村落完整照片"
+            >
+              <img
+                src="assets/bada-village-chensiyuan.jpg"
+                alt="从元阳巴达方向望去，山林之间的村落与坡地耕地被流动的云雾环绕。"
+                width="1280"
+                height="935"
+                loading="lazy"
+              />
+              <span class="image-expand" aria-hidden="true">↗</span>
+            </button>
+            <figcaption>
+              <span>FIG. 01 / 云雾之间的村落 · 巴达方向</span
+              ><span
+                >© chensiyuan ·
+                <a
+                  href="https://creativecommons.org/licenses/by-sa/4.0/"
+                  target="_blank"
+                  rel="noreferrer"
+                  >CC BY-SA 4.0</a
+                >
+                ·
+                <a
+                  href="https://commons.wikimedia.org/wiki/File:1_yuanyang_county_rice_terrace_bada_view_2012.jpg"
+                  target="_blank"
+                  rel="noreferrer"
+                  >来源 ↗</a
+                ></span
+              >
+            </figcaption>
+          </figure>
+          <div class="opening-copy">
+            <span class="folio-number" aria-hidden="true">01</span>
+            <h3>山水之间，<br />有人生活。</h3>
+            <p>
+              从远处望去，田埂像山坡上的细密笔触。把视线抬高，林地与村落也进入画面。一张照片，开始有了比风景更深的层次。
+            </p>
+            <p>
+              在红河哈尼梯田的区域系统中，村寨位于山顶森林与梯田之间，沟渠将水引向耕地。理解这片地景，需要把这些联系一起读进去。<a
+                class="reference-mark"
+                href="https://whc.unesco.org/en/list/1111/"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="区域资料：UNESCO 红河哈尼梯田"
+                >[1]</a
+              >
+            </p>
+            <a class="text-link" href="#connections"
+              >沿着水，读一面山坡 <span>↘</span></a
+            >
+          </div>
+        </div>
+        <div class="issue-line">
+          <span>本期线索</span>
+          <p>地形的秩序<span> / </span>水的联系<span> / </span>生活的尺度</p>
+          <span>LAND · WATER · PEOPLE</span>
+        </div>
+      </section>
+
+      <section
+        class="connections"
+        id="connections"
+        aria-labelledby="connections-title"
+      >
+        <div class="section-kicker">
+          <span>02 / A CONNECTED LANDSCAPE</span><span>点击节点，读懂联系</span>
+        </div>
+        <div class="connections-heading">
+          <h2 id="connections-title">一滴水的去向，<br />一面山的秩序。</h2>
+          <p>
+            山林、村寨、梯田与河流，<br />构成相互联系的地景。<br />从一个节点出发，读见整体。
+          </p>
+        </div>
+        <div class="connections-layout">
+          <div class="diagram-wrap">
+            <div class="land-diagram" data-active="forest">
+              <svg
+                viewBox="0 0 800 510"
+                role="img"
+                aria-labelledby="diagram-title diagram-desc"
+              >
+                <title id="diagram-title">森林、村寨、梯田与河流关系示意</title>
+                <desc id="diagram-desc">
+                  从左上方的山林，经坡面上的村落与层层梯田，延伸到右下方河谷。虚线表示概念性的水联系，图形不代表实测海拔、距离或真实水流线路。
+                </desc>
+                <defs>
+                  <linearGradient id="slope-fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop stop-color="#6d8468" stop-opacity=".23" />
+                    <stop offset="1" stop-color="#6d8468" stop-opacity="0" />
+                  </linearGradient>
+                  <pattern
+                    id="diagram-grid"
+                    width="40"
+                    height="40"
+                    patternUnits="userSpaceOnUse"
+                  >
+                    <circle cx="1" cy="1" r=".7" fill="#c7d0b8" opacity=".22" />
+                  </pattern>
+                </defs>
+                <rect width="800" height="510" fill="url(#diagram-grid)" />
+                <g class="terrain-lines">
+                  <path
+                    d="M25 244Q102 45 196 145T351 253Q402 261 450 320L480 320 480 337 511 337 511 354 550 354 550 373 595 373 595 390 648 390 648 406 718 406Q756 410 780 436L780 510H25Z"
+                    fill="url(#slope-fill)"
+                  />
+                  <path
+                    d="M25 244Q102 45 196 145T351 253Q402 261 450 320L480 320 480 337 511 337 511 354 550 354 550 373 595 373 595 390 648 390 648 406 718 406Q756 410 780 436"
+                  />
+                  <path
+                    d="M25 270Q105 97 190 171T343 279Q397 286 438 342L471 342 471 358 503 358 503 376 543 376 543 394 589 394 589 411 644 411 644 428 718 428"
+                  />
+                  <path
+                    d="M25 300Q111 137 185 205T334 307Q387 313 431 367L460 367 460 383 494 383 494 399 536 399 536 417 583 417 583 434 638 434 638 450 714 450"
+                  />
+                  <path
+                    d="M25 332Q112 180 180 237T326 337Q380 342 422 394L450 394 450 410 485 410 485 426 528 426 528 443 576 443 576 459 632 459 632 475 710 475"
+                  />
+                  <path
+                    d="M25 364Q114 221 178 270T320 369Q374 375 414 422L438 422 438 437 476 437 476 453 520 453 520 470 570 470 570 485 625 485"
+                  />
+                  <path
+                    d="M25 399Q116 262 177 305T314 402Q368 407 403 451L428 451 428 468 468 468 468 484 510 484"
+                  />
+                  <path
+                    d="M25 434Q117 303 174 340T308 434Q359 441 395 480L418 480 418 497"
+                  />
+                  <path d="M25 469Q120 344 172 375T304 468Q344 474 373 507" />
+                </g>
+                <g class="diagram-zone zone-forest">
+                  <g class="trees">
+                    <path
+                      d="M73 190v-38m-15 18 15-33 15 33m-30 11 15-30 15 30M104 151v-40m-17 19 17-36 17 36m-34 12 17-32 17 32M141 133V88m-18 22 18-40 18 40m-36 12 18-35 18 35M180 153v-39m-16 18 16-34 16 34m-32 12 16-31 16 31M211 190v-37m-15 17 15-32 15 32m-30 11 15-30 15 30"
+                    />
+                  </g>
+                  <path d="M78 205Q140 162 207 205" class="zone-underline" />
+                </g>
+                <g class="diagram-zone zone-village houses">
+                  <path
+                    d="M288 244v-31l18-15 20 15v39m-38-39h38m-26 36v-21h12v25M324 259v-28l22-16 24 16v39m-46-39h46m-31 34v-20h13v23M275 231v-24l-17-13-18 13v23m0-23h35m-24 23v-15h10v18"
+                  />
+                </g>
+                <g class="diagram-zone zone-terraces rice">
+                  <path
+                    d="m465 315-3-12m3 6 6-8m-1 14 5-11m26 29-3-13m3 7 6-8m-1 14 4-10m28 27-3-12m3 6 6-8m-1 14 4-10m29 28-3-12m3 7 6-8m-1 13 5-10m31 26-3-12m3 7 6-8m-1 13 4-10m31 23-3-12m3 7 6-8m-1 13 5-10"
+                  />
+                </g>
+                <g class="diagram-zone zone-river river-lines">
+                  <path
+                    d="M656 444q44-16 94 7t42 0M675 459q34-9 70 8t47 1M697 478q24-5 48 7t47 1"
+                  />
+                </g>
+                <path
+                  class="water-route"
+                  d="M155 187C178 222 220 236 253 244S318 279 361 292 414 327 452 348 503 387 548 407 636 443 706 453"
+                />
+                <g class="diagram-guides">
+                  <path d="M144 68v-24M307 194v-61M526 304v-65M720 415v-77" />
+                </g>
+                <text x="28" y="42" class="diagram-marginalia">
+                  AILAO MOUNTAINS / 哀牢山地
+                </text>
+                <text x="28" y="495" class="diagram-marginalia">
+                  CONCEPTUAL SECTION · NOT TO SCALE
+                </text>
+              </svg>
+              <button
+                type="button"
+                class="diagram-node forest-node"
+                data-relation="forest"
+                aria-pressed="true"
+              >
+                <span>01</span>森林
+              </button>
+              <button
+                type="button"
+                class="diagram-node village-node"
+                data-relation="village"
+                aria-pressed="false"
+              >
+                <span>02</span>村寨
+              </button>
+              <button
+                type="button"
+                class="diagram-node terraces-node"
+                data-relation="terraces"
+                aria-pressed="false"
+              >
+                <span>03</span>梯田
+              </button>
+              <button
+                type="button"
+                class="diagram-node river-node"
+                data-relation="river"
+                aria-pressed="false"
+              >
+                <span>04</span>河流
+              </button>
+            </div>
+            <p class="diagram-caption">
+              区域关系示意 /
+              非实测地形剖面；虚线仅表达水的联系，不对应照片中的真实流线。
+            </p>
+          </div>
+          <div class="connection-reading" aria-live="polite" aria-atomic="true">
+            <div class="connection-index">
+              <span id="relation-number">01</span><span>/ 04</span>
+            </div>
+            <p class="eyebrow" id="relation-label">FOREST / 山顶森林</p>
+            <h3 id="relation-title">水的故事，<br />从山林开始。</h3>
+            <p id="relation-copy">
+              区域资料将山顶森林与水源联系起来。水经沟渠输送到坡面上的梯田，森林因而是理解农田系统的一部分。
+            </p>
+            <p class="relation-question" id="relation-question">
+              试着想一想：田里的水，与田地之外的哪些地方有关？
+            </p>
+            <div class="relation-controls">
+              <button
+                type="button"
+                data-action="relation-prev"
+                aria-label="上一个地景节点"
+              >
+                ←</button
+              ><span id="relation-step">森林 → 村寨</span
+              ><button
+                type="button"
+                data-action="relation-next"
+                aria-label="下一个地景节点"
+              >
+                →
+              </button>
+            </div>
+            <a
+              class="connection-source"
+              href="https://whc.unesco.org/en/list/1111/"
+              target="_blank"
+              rel="noreferrer"
+              >区域资料 / UNESCO ↗</a
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="photo-folio" id="folio" aria-labelledby="folio-title">
+        <div class="folio-heading paper-section">
+          <div>
+            <p class="eyebrow">03 / LIGHT & RICE</p>
+            <h2 id="folio-title">同一片山地，<em>不同的表情。</em></h2>
+          </div>
+          <div class="folio-selector" role="group" aria-label="选择摄影画页">
+            <button type="button" data-folio="cover" aria-pressed="false">
+              <span>01</span> 水面的银</button
+            ><button type="button" data-folio="green" aria-pressed="true">
+              <span>02</span> 田野的绿
+            </button>
+          </div>
+        </div>
+        <figure class="folio-figure">
+          <button
+            type="button"
+            class="folio-image-button"
+            id="folio-open"
+            data-photo="green"
+            aria-label="展开田野的绿完整照片"
+          >
+            <img
+              id="folio-photo"
+              src="assets/hani-terraces-xiquinhosilva.jpg"
+              alt="层叠的绿色梯田沿元阳山坡展开，其间可见水面、树木与小型建筑。"
+              width="2560"
+              height="1709"
+              loading="lazy"
+            />
+            <span class="folio-photo-title" id="folio-photo-title"
+              >稻色，铺满山的褶皱。</span
+            ><span class="folio-view">完整观赏 ↗</span>
+          </button>
+          <figcaption>
+            <div>
+              <span class="eyebrow" id="folio-credit"
+                >PHOTOGRAPH © Xiquinho Silva / 2023.06.23</span
+              >
+              <p id="folio-description">
+                绿色的田面与细密田埂，让坡地呈现出另一种纹理。
+              </p>
+            </div>
+            <a
+              id="folio-source"
+              href="https://commons.wikimedia.org/wiki/File:Hani_Rice_Terraces_(53696483750).jpg"
+              target="_blank"
+              rel="noreferrer"
+              >CC BY 2.0 · 摄影来源 ↗</a
+            >
+          </figcaption>
+        </figure>
+        <p class="folio-footnote">
+          两张摄影的时间与取景位置不同，呈现区域内的两种景观视角。
+        </p>
+      </section>
+
+      <section
+        class="observations paper-section"
+        id="observations"
+        aria-labelledby="observations-title"
+      >
+        <div class="section-kicker">
+          <span>04 / LOOK A LITTLE CLOSER</span><span>四个入口，慢慢读</span>
+        </div>
+        <div class="observations-layout">
+          <div class="observations-heading">
+            <p class="eyebrow">从风景，到地理</p>
+            <h2 id="observations-title">值得看的，<br />藏在细节里。</h2>
+            <p>一次只追随一条线索。<br />从照片开始，让问题带着目光走。</p>
+            <button type="button" class="text-link" data-action="notes">
+              打开我的观察札记 <span>↗</span>
+            </button>
+          </div>
+          <div class="observation-list">
+            <button
+              type="button"
+              class="observation-row"
+              data-topic="terraces"
+              data-open-reading
+            >
+              <span class="row-number">01</span
+              ><span class="row-copy"
+                ><span>地形 / TERRAIN</span><strong>沿着山势，一层一层</strong
+                ><small>从弯曲的田埂，读出山坡的起伏。</small></span
+              ><span class="row-arrow" aria-hidden="true">↗</span>
+            </button>
+            <button
+              type="button"
+              class="observation-row"
+              data-topic="water"
+              data-open-reading
+            >
+              <span class="row-number">02</span
+              ><span class="row-copy"
+                ><span>水系 / WATER</span><strong>让水，在坡地上停留</strong
+                ><small>在明暗之间，寻找田面与田埂的边界。</small></span
+              ><span class="row-arrow" aria-hidden="true">↗</span>
+            </button>
+            <button
+              type="button"
+              class="observation-row"
+              data-topic="forest"
+              data-open-reading
+            >
+              <span class="row-number">03</span
+              ><span class="row-copy"
+                ><span>植被 / FOREST</span><strong>耕地之外，还有山林</strong
+                ><small>把视线从田里，移向树木与林地。</small></span
+              ><span class="row-arrow" aria-hidden="true">↗</span>
+            </button>
+            <button
+              type="button"
+              class="observation-row"
+              data-topic="people"
+              data-open-reading
+            >
+              <span class="row-number">04</span
+              ><span class="row-copy"
+                ><span>人居 / PEOPLE</span><strong>生活，留在山的纹理里</strong
+                ><small>田埂与小路，让人的尺度显现出来。</small></span
+              ><span class="row-arrow" aria-hidden="true">↗</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <footer class="site-footer paper-section">
+        <div class="footer-top">
+          <a class="footer-wordmark" href="#cover"
+            >Landfold<span>地景志</span></a
+          >
+          <p>循着地景的纹理，<br />读懂一片土地。</p>
+          <button type="button" data-action="about" class="text-link">
+            关于本刊与摄影来源 ↗
           </button>
         </div>
-        <span class="eyebrow"
-          ><span id="topic-number">01</span> / 地景观察</span
-        >
-        <h2 id="topic-title" aria-live="polite">沿着山势，一层一层</h2>
-        <p class="detail-copy" id="topic-summary">
-          照片里的田埂沿坡面层叠展开。顺着弧线看，耕地的尺度、坡地的起伏，便逐渐有了可辨认的秩序。
-        </p>
-        <div class="panel-tools">
-          <button type="button" data-action="save" id="save-note">
-            记入札记 ＋</button
-          ><button type="button" data-action="read">阅读全文 ↗</button>
+        <div class="footer-bottom">
+          <span>A LANDSCAPE JOURNAL / 山地与人居 · 001</span
+          ><a
+            href="https://github.com/SharkerSwag/Landfold"
+            target="_blank"
+            rel="noreferrer"
+            >GitHub ↗</a
+          ><a href="#cover">回到山水之间 ↑</a>
         </div>
-      </aside>
-      <noscript
-        ><p class="noscript-note">
-          请开启 JavaScript
-          以使用观察标注与阅读功能。完整照片仍可通过“摄影来源”链接查看。
-        </p></noscript
-      >
+      </footer>
     </main>
 
     <dialog

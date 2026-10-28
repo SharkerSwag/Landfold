@@ -31,6 +31,70 @@ export const photos = {
     height: 1709,
     alt: "云南元阳绿色梯田的真实摄影，田间可见林地、局部水面与小型建筑。",
   },
+  village: {
+    file: "assets/bada-village-chensiyuan.jpg",
+    title: "Village seen from Bada, Yuanyang",
+    author: "chensiyuan",
+    date: "标题标注 2012；EXIF 标注 2013 年 1 月 4 日，信息存在差异",
+    license: "CC BY-SA 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+    source:
+      "https://commons.wikimedia.org/wiki/File:1_yuanyang_county_rice_terrace_bada_view_2012.jpg",
+    width: 1280,
+    height: 935,
+    rendition: "Wikimedia 提供的 1280px 缩略版本；保留完整构图。",
+    alt: "从元阳巴达方向望去，村落位于林地之间，坡面耕地与云雾环绕其下。",
+  },
+};
+
+export const folio = {
+  cover: {
+    title: "水面，收藏一片天光。",
+    label: "水面的银",
+    credit: "PHOTOGRAPH © Charrine Liu / 拍摄日期未详",
+    description: "蓄水的田面映着天空，田埂将明亮的倒影分成细密的形状。",
+  },
+  green: {
+    title: "稻色，铺满山的褶皱。",
+    label: "田野的绿",
+    credit: "PHOTOGRAPH © Xiquinho Silva / 2023.06.23",
+    description: "绿色的田面与细密田埂，让坡地呈现出另一种纹理。",
+  },
+};
+
+export const relations = {
+  forest: {
+    number: "01",
+    name: "森林",
+    label: "FOREST / 山顶森林",
+    title: "水的故事，|从山林开始。",
+    copy: "区域资料将山顶森林与水源联系起来。水经沟渠输送到坡面上的梯田，森林因而是理解农田系统的一部分。",
+    question: "试着想一想：田里的水，与田地之外的哪些地方有关？",
+  },
+  village: {
+    number: "02",
+    name: "村寨",
+    label: "VILLAGE / 山间人居",
+    title: "在林与田之间，|安放生活。",
+    copy: "村寨位于山顶森林与梯田之间。水的分配与沟渠维护也依赖社区协作，人与人的关系，参与塑造了这片地景。",
+    question: "看一处聚落时，除了房屋，还可以追问它与水和耕地的关系。",
+  },
+  terraces: {
+    number: "03",
+    name: "梯田",
+    label: "TERRACES / 坡地耕作",
+    title: "顺着坡地，|留下水与稻。",
+    copy: "梯田沿山势展开，沟渠将水带入田中。弯曲的田埂既是照片里的纹理，也与耕作和水的管理相连。",
+    question: "同一条田埂，怎样同时成为画面中的线条与生活中的设施？",
+  },
+  river: {
+    number: "04",
+    name: "河流",
+    label: "RIVER / 山下河谷",
+    title: "把目光，|放回整个流域。",
+    copy: "红河位于山地之下。将视野从单块田地扩展到山林、聚落与河谷，才能看见地景所处的更大空间。",
+    question: "照片之外，还有哪些联系，需要借助区域资料才能理解？",
+  },
 };
 
 // Relative positions identify visible photographic details, not measured map coordinates.

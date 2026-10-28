@@ -25,6 +25,17 @@ The initial A/B/C comparison is retained on the separate [design/photographic-pr
 
 The prototype is a historical design reference. It is not part of the public Pages source or an alternative production frontend.
 
-## Initial scope
+## Current issue
+
+The 2026-10-28 expansion keeps the B cover and develops it into a four-chapter publication:
+
+1. **山地序章**: a quiet paper spread with authentic village photography and a geographical reading of the landscape.
+2. **地景关系**: an original forest-green mechanism drawing, with four selectable nodes and accompanying explanations.
+3. **光与稻色**: large photographic folios showing distinct perspectives, with transparent dates and attribution.
+4. **细看一处**: four observation readings and a browser-local notebook for personal responses and Markdown export.
+
+The diagram is explicitly schematic. The photographic folios are not presented as same-location before/after images. The local serif subset keeps Chinese typography consistent across devices without an external font dependency.
+
+## Initial scope (historical)
 
 One geographical feature, two attributed photographs, four observation topics, complete photo viewing, a source reader and a session-only notebook. Subsequent topics and Agent functionality can be added once this visual foundation is established.

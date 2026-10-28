@@ -12,6 +12,7 @@ const types = {
   ".jpg": "image/jpeg",
   ".png": "image/png",
   ".svg": "image/svg+xml",
+  ".ttf": "font/ttf",
 };
 const server = http.createServer(async (request, response) => {
   const url = new URL(request.url, "http://127.0.0.1");
