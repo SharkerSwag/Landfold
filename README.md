@@ -20,19 +20,23 @@ Landfold 通过真实风景摄影、可点击的观察点与有来源的解释�
 - Share a direct link to a selected observation through URL fragments.
 - Use the same experience on desktop and mobile.
 
-This release is a static, interactive reading experience. A live conversational Agent is not connected yet. Future model calls will require a separate backend; model API keys must never be shipped to this public site. The [working roadmap](ROADMAP.md) separates the visual publication work from the later coursework Agent integration.
+The [Quanfuzhuang investigation](https://sharkerswag.github.io/Landfold/investigate.html) lets readers draw a line on a published land-use map, inspect the sampled land-use sequence and consult the study's photos and evidence. The same page enables the conversational Agent when served locally with model credentials.
 
 Notebook data stays in the current browser's local storage, with no upload or cross-device synchronization. If storage is unavailable, the interface reports that notes are session-only and offers export. Clearing website data removes saved notes.
 
 ## Local development
 
-No dependencies or build step are required. With Node.js 20 or later:
+No dependencies or build step are required. Use Node.js 20.12 or later. For the Agent, copy `.env.example` to `.env` and fill in the base URL, model name and key for a Chat Completions provider that supports function calling. Keep the key in `.env` or the server environment.
 
 ```sh
 npm run dev
 ```
 
 Open **http://127.0.0.1:4180/Landfold/**. The local server uses the same project path as GitHub Pages so relative assets and module imports can be checked before publication.
+
+Open **http://127.0.0.1:4180/Landfold/investigate.html** and ask the suggested question using both preset lines. The server loads [the investigation Skill](skills/check-transect/SKILL.md), sends the model tool schemas, executes the requested calculations and source lookups, and sends the tool results back to the model. The answer includes the tools and sources actually consulted. Conversation memory retains up to eight completed turns in a server session. Refreshing the page starts a new conversation. Export saves the visible conversation with the selected endpoints and sources as Markdown.
+
+The static Pages site supports the map, sampling and sources. Model calls run from the local server. The evidence map is a published land-use figure, so the line uses normalized image coordinates. Counts describe pixels sampled along the selected line. Verifying altitude or channel direction would require geographically aligned data.
 
 ## GitHub Pages
 
@@ -55,6 +59,9 @@ docs/                   Public website and static assets
   styles.css            Photographic cover and base reader layouts
   journal.css           Editorial issue, diagram, typography and responsive layouts
 scripts/serve.mjs       Local preview server
+server/                Local conversation endpoint and Agent tool loop
+skills/check-transect/ Source verification workflow loaded by the Agent
+scripts/derive-land-cover.py Regenerate the sampling grid from the published map
 scripts/refresh-font.py Refresh the Chinese font subset after text changes
 THIRD_PARTY_NOTICES.md   Photographer credits, sources and licenses
 DESIGN.md               Selected direction and design archive

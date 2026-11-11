@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#213c31" />
+    <title>全福庄小流域探究 · Landfold 地景志</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="investigate.css" />
+    <script type="module" src="investigate.js"></script>
+  </head>
+  <body>
+    <header class="masthead">
+      <nav aria-label="主导航">
+        <a href="./" class="wordmark">Landfold <small>地景志</small></a>
+        <a href="./#connections">返回元阳图志</a>
+      </nav>
+      <div class="opening">
+        <div class="introduction">
+          <p>云南元阳 · 地理探究</p>
+          <h1>全福庄小流域</h1>
+          <p>
+            在土地利用图上选线，看看村寨、林地与梯田怎样相邻，再查资料验证你的判断。
+          </p>
+        </div>
+        <figure>
+          <div class="opening-photo">
+            <img
+              src="assets/quanfuzhuang-photo.png"
+              width="2321"
+              height="1631"
+              alt="研究现场的全福庄小流域梯田"
+            />
+          </div>
+          <figcaption>
+            全福庄小流域现场 ·
+            <a href="https://doi.org/10.3390/w14244110">Liu 等，2022，图 3d</a>
+          </figcaption>
+        </figure>
+      </div>
+    </header>
+    <main>
+      <div class="workspace">
+        <section class="map-section" aria-labelledby="map-title">
+          <div class="section-head">
+            <h2 id="map-title">沿线读图</h2>
+            <a href="assets/quanfuzhuang-map.png" target="_blank" rel="noopener"
+              >查看研究原图 ↗</a
+            >
+          </div>
+          <div class="controls" role="group" aria-label="选择调查线">
+            <button type="button" data-line="settlement" aria-pressed="true">
+              穿过村寨
+            </button>
+            <button type="button" data-line="terraces" aria-pressed="false">
+              沿梯田带
+            </button>
+            <button type="button" id="draw-line" aria-pressed="false">
+              自选两点
+            </button>
+          </div>
+          <p id="map-status" role="status">从 A 到 B 读取沿线地类。</p>
+          <div class="profile-head">
+            <h3>沿线地类</h3>
+            <span id="sample-count"></span>
+          </div>
+          <div class="profile" aria-hidden="true">
+            <span>A</span>
+            <div id="profile-strip"></div>
+            <span>B</span>
+          </div>
+          <ul
+            id="class-counts"
+            class="class-counts"
+            aria-label="地类采样结果"
+          ></ul>
+          <div
+            class="study-map"
+            id="study-map"
+            aria-label="全福庄小流域土地利用图局部"
+          >
+            <div class="map-image">
+              <img
+                src="assets/quanfuzhuang-map.png"
+                width="4064"
+                height="1790"
+                alt="研究区土地利用图。蓝色表示梯田，绿色表示森林，橙色表示村寨。"
+              />
+            </div>
+            <span class="north" aria-label="图上方为北">北 ↑</span>
+            <canvas aria-hidden="true"></canvas>
+          </div>
+          <p class="caption">
+            依据 Liu 等（2022）图 1c
+            的颜色采样。未判读包含图外、文字及符号。点数描述当前选线，不能换算为面积或高程。
+          </p>
+        </section>
+        <section class="inquiry" aria-labelledby="inquiry-title">
+          <div class="section-head">
+            <h2 id="inquiry-title">查证一个判断</h2>
+          </div>
+          <p class="lead">这条线经过村寨和梯田吗？能据此判断它们谁高谁低吗？</p>
+          <div id="availability" class="availability" role="status">
+            正在检查 Agent 连接…
+          </div>
+          <div
+            id="conversation"
+            aria-label="对话记录"
+            role="log"
+            aria-live="polite"
+          ></div>
+          <form id="question-form" hidden>
+            <button type="button" class="suggestion" id="example-question">
+              使用上面的探究问题
+            </button>
+            <label for="question">关于当前选线的问题</label>
+            <textarea
+              id="question"
+              name="question"
+              rows="3"
+              maxlength="1200"
+              required
+            ></textarea>
+            <div class="question-actions">
+              <button class="primary" type="submit">查证</button>
+              <button id="export-inquiry" type="button" hidden>
+                导出本次探究
+              </button>
+            </div>
+          </form>
+          <p id="question-status" role="status"></p>
+          <details class="reading-sources" open>
+            <summary>全福庄的资料</summary>
+            <div id="study-sources"></div>
+            <a
+              href="assets/quanfuzhuang-photo.png"
+              target="_blank"
+              rel="noopener"
+              >查看现场照片与采样场景 ↗</a
+            >
+          </details>
+        </section>
+      </div>
+    </main>
+    <footer>
+      <span>Landfold · 地景志</span>
+      <span
+        >地图与照片 © Liu 等，2022 ·
+        <a href="https://creativecommons.org/licenses/by/4.0/"
+          >CC BY 4.0</a
+        ></span
+      >
+    </footer>
+  </body>
+</html>

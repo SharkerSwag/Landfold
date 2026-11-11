@@ -2,6 +2,15 @@ import http from "node:http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { modelConfig } from "../server/agent.mjs";
+import { agentRoute } from "../server/agent-route.mjs";
+
+try {
+  process.loadEnvFile?.(fileURLToPath(new URL("../.env", import.meta.url)));
+} catch (error) {
+  if (error.code !== "ENOENT") throw error;
+}
+const serveAgent = agentRoute(modelConfig());
 
 const root = fileURLToPath(new URL("../docs/", import.meta.url));
 const base = "/Landfold/";
@@ -16,6 +25,9 @@ const types = {
 };
 const server = http.createServer(async (request, response) => {
   const url = new URL(request.url, "http://127.0.0.1");
+  if (url.pathname === base + "api/agent") {
+    return serveAgent(request, response);
+  }
   if (url.pathname === "/" || url.pathname === "/Landfold") {
     response.writeHead(302, { Location: base + url.search + url.hash }).end();
     return;
