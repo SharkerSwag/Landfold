@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#ffffff" />
     <title>全福庄小流域探究 · Landfold 地景志</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="investigate.css?v=0.4.2" />
-    <script type="module" src="investigate.js?v=0.4.2"></script>
+    <link rel="stylesheet" href="investigate.css?v=0.5.0" />
+    <script type="module" src="investigate.js?v=0.5.0"></script>
   </head>
   <body>
     <header class="masthead">
@@ -23,16 +23,32 @@
       <div class="page-title">
         <p>云南元阳</p>
         <h1>全福庄小流域</h1>
-        <p>在土地利用图上取样，比较村寨、梯田与森林的分布。</p>
+        <p>沿线读地类，按月比较梯田的水源补给。</p>
+      </div>
+      <div class="view-switch" role="group" aria-label="探究方式">
+        <button type="button" data-view="map" aria-pressed="true">
+          地图选线
+        </button>
+        <button type="button" data-view="recharge" aria-pressed="false">
+          水源对照
+        </button>
       </div>
       <nav class="section-links" aria-label="探究页面区块">
-        <a href="#map-title">地图</a>
-        <a href="#comparison-title">结果</a>
+        <a href="#map-title" data-for-view="map">地图</a>
+        <a href="#comparison-title" data-for-view="map">结果</a>
+        <a href="#recharge-title" data-for-view="recharge" hidden>月份</a>
+        <a href="#recharge-results-title" data-for-view="recharge" hidden
+          >对照</a
+        >
         <a href="#inquiry-title">查证</a>
         <a href="#research-sources">资料</a>
       </nav>
       <div class="workspace">
-        <section class="map-section panel" aria-labelledby="map-title">
+        <section
+          class="map-section panel"
+          aria-labelledby="map-title"
+          data-for-view="map"
+        >
           <div class="section-head">
             <h2 id="map-title" tabindex="-1">土地利用图</h2>
             <a href="assets/quanfuzhuang-map.png" target="_blank" rel="noopener"
@@ -110,11 +126,53 @@
             的颜色采样。未判读包含图外、文字及符号。点数描述当前选线，不能换算为面积或高程。
           </p>
         </section>
+        <section
+          class="panel recharge-panel"
+          aria-labelledby="recharge-title"
+          data-for-view="recharge"
+          hidden
+        >
+          <div class="section-head">
+            <h2 id="recharge-title" tabindex="-1">各月的水源补给</h2>
+            <a
+              href="https://doi.org/10.3390/w14244110"
+              target="_blank"
+              rel="noopener"
+              >研究表 2 ↗</a
+            >
+          </div>
+          <div class="month-fields">
+            <label for="month-first"
+              >月份 A
+              <select id="month-first"></select
+            ></label>
+            <label for="month-second"
+              >月份 B
+              <select id="month-second"></select
+            ></label>
+          </div>
+          <p id="month-status" class="caption" role="status"></p>
+          <div class="recharge-legend">
+            <span><i class="rain-swatch"></i>降水</span
+            ><span><i class="groundwater-swatch"></i>地下水</span>
+            <span class="caption">估算补给占比</span>
+          </div>
+          <ol
+            id="recharge-chart"
+            class="recharge-chart"
+            aria-label="各月降水和地下水的估算补给占比"
+          ></ol>
+          <p class="caption">
+            全福庄小流域 · 2015 年 5 月至 2016 年 4
+            月。研究通过稳定同位素与二元混合模型估算比例。
+          </p>
+        </section>
         <div class="sidebar">
           <section
             class="panel"
             id="comparison"
             aria-labelledby="comparison-title"
+            data-for-view="map"
           >
             <div class="section-head">
               <h2 id="comparison-title" tabindex="-1">选线结果</h2>
@@ -137,6 +195,39 @@
               点表示沿线未采到。图面位置无法判断海拔高低。
             </p>
           </section>
+          <section
+            class="panel recharge-results"
+            aria-labelledby="recharge-results-title"
+            data-for-view="recharge"
+            hidden
+          >
+            <div class="section-head">
+              <h2 id="recharge-results-title" tabindex="-1">月份对照</h2>
+            </div>
+            <table aria-label="两个月的水源补给比例">
+              <thead>
+                <tr>
+                  <th scope="col">水源</th>
+                  <th id="month-first-column" scope="col"></th>
+                  <th id="month-second-column" scope="col"></th>
+                  <th scope="col">变化</th>
+                </tr>
+              </thead>
+              <tbody id="recharge-comparison"></tbody>
+            </table>
+            <p class="caption">
+              变化为 B 减
+              A，单位是百分点。占比升高还不足以判断补给水量是否增加。
+            </p>
+            <div class="compare-actions recharge-actions">
+              <button type="button" id="share-months">复制月份链接</button>
+              <button type="button" id="export-months">下载水源对照</button>
+            </div>
+            <label class="share-fallback" id="month-share-fallback" hidden>
+              月份链接 <input type="url" readonly />
+            </label>
+            <p id="month-share-status" class="caption" role="status"></p>
+          </section>
           <section class="inquiry panel" aria-labelledby="inquiry-title">
             <div class="section-head">
               <h2 id="inquiry-title" tabindex="-1">Agent 查证</h2>
@@ -157,7 +248,9 @@
               <button type="button" class="suggestion" id="example-question">
                 使用上面的探究问题
               </button>
-              <label for="question">关于当前选线的问题</label>
+              <label id="question-label" for="question"
+                >关于当前选线的问题</label
+              >
               <textarea
                 id="question"
                 name="question"

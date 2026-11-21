@@ -22,6 +22,8 @@ Landfold 通过真实风景摄影、可点击的观察点与有来源的解释�
 
 The [Quanfuzhuang investigation](https://sharkerswag.github.io/Landfold/investigate.html) lets readers draw a line on a published land-use map, inspect one sample at a time, and pin a second line for comparison. Selecting a count highlights the matching sample ranges. A shared link restores both lines and the highlighted class, and the comparison can be downloaded as Markdown. The same page enables the DeepSeek Agent when served locally with model credentials. Each reply has map checks that restore the selections from that turn.
 
+The [water-source comparison](https://sharkerswag.github.io/Landfold/investigate.html#view=recharge&months=2015-07%2C2016-04) charts monthly precipitation and groundwater shares from Liu et al. (2022), Table 2. Select two months to calculate the difference in percentage points. The values are study estimates of source composition. Absolute recharge volumes require additional data.
+
 Notebook data stays in the current browser's local storage, with no upload or cross-device synchronization. If storage is unavailable, the interface reports that notes are session-only and offers export. Clearing website data removes saved notes.
 
 ## Local development
@@ -34,11 +36,11 @@ npm run dev
 
 Open **http://127.0.0.1:4180/Landfold/**. The local server uses the same project path as GitHub Pages so relative assets and module imports can be checked before publication.
 
-Open **http://127.0.0.1:4180/Landfold/investigate.html** and ask the suggested question using both preset lines. The server loads [the investigation Skill](skills/check-transect/SKILL.md), sends the model tool schemas, executes the requested calculations and source lookups, and sends the tool results back to the model. The answer includes the tools and sources actually consulted. Conversation memory retains up to eight completed turns in a server session. Refreshing the page starts a new conversation. Export saves the visible conversation with the selected endpoints and sources as Markdown.
+Open **http://127.0.0.1:4180/Landfold/investigate.html** to ask about the current line or month pair. The server loads [the investigation Skill](skills/check-transect/SKILL.md), sends the tool schemas for the current view, executes the requested calculations and source lookups, and sends the results back to the model. Conversation memory retains up to eight completed turns in a server session across both views. Refreshing the page starts a new conversation. Export saves the visible conversation with both kinds of selection and their sources as Markdown.
 
 For a review run, start with “穿过村寨”, pin it as the reference, and switch to “沿梯田带”. Ask which line sampled a settlement and whether the map establishes elevation. The reference has 8 settlement readings out of 55 points, and the current line has 0 out of 45. Use the links in the answer to check the cited material. Run `npm test` for the sampling and tool-loop regression checks. See the [iteration review](REVIEW.md) for tested behavior and remaining gaps.
 
-The static Pages site supports the map, sampling and sources. Model calls run from the local server. The evidence map is a published land-use figure, so the line uses normalized image coordinates. Counts describe pixels sampled along the selected line. Verifying altitude or channel direction would require geographically aligned data.
+The static Pages site supports map sampling, water-source comparisons and sources. Model calls run from the local server. The evidence map is a published land-use figure, so the line uses normalized image coordinates. Counts describe pixels sampled along the selected line. Verifying altitude or channel direction would require geographically aligned data.
 
 ## GitHub Pages
 

@@ -1,6 +1,6 @@
 {
   "name": "landfold",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "description": "An interactive geography journal exploring the connections between land, water, and people.",

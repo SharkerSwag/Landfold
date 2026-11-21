@@ -1,5 +1,14 @@
 # Landfold iteration reviews
 
+## 0.5.0 · 2026-11-21
+
+Review task: check a village's sample range, switch to a monthly water-source comparison in the same conversation, change the months, and reopen both kinds of evidence.
+
+- The map-only version could cite research about water, but it had no calculation or reproducible selection for a water question. The second view now presents twelve months from Table 2 and compares the selected pair.
+- In a live DeepSeek session, the map answer located village samples 37–44. After switching views, the Agent calculated a 74-percentage-point increase for July 2015 versus April 2016 and an 8-percentage-point decrease for November versus December 2015. The replies kept the distinction between estimated shares and recharge volumes.
+- Tested at 320–1440 pixels. A copied link restores the month pair, and conversation recall restores the months or map evidence from the corresponding turn. The mixed Markdown export includes the selections, results and original source.
+- **Range of investigation: 4 / 5. Evidence reproducibility: 4.5 / 5.** Both experiences cover one field study. Recharge estimates cover one sampling year, and the site still lacks georeferenced elevation for the study map. Live dialogue remains a local feature.
+
 ## 0.4.2 · 2026-11-21
 
 Review task: on a phone, locate the eight settlement readings on the map, compare the terrace line, and send someone a link that restores the selected evidence.

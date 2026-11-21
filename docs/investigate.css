@@ -152,6 +152,105 @@ footer {
 .section-links {
   display: none;
 }
+.view-switch {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.month-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-block: 14px 8px;
+}
+.month-fields label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.84rem;
+}
+.month-fields select {
+  min-height: 38px;
+  max-width: 100%;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: inherit;
+  font: inherit;
+}
+.recharge-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 15px;
+  align-items: center;
+  margin-block: 15px 6px;
+  font-size: 0.82rem;
+}
+.recharge-legend i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-inline-end: 5px;
+}
+.rain-swatch,
+.recharge-bar span:first-child {
+  background: #3263cc;
+}
+.groundwater-swatch,
+.recharge-bar span:last-child {
+  background: #657c68;
+}
+.recharge-chart {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+}
+.recharge-chart li {
+  display: grid;
+  grid-template-columns: 8em minmax(0, 1fr) 6.5em;
+  gap: 6px 10px;
+  align-items: center;
+  min-height: 31px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.81rem;
+}
+.recharge-chart li[data-selection="A"],
+.recharge-chart li[data-selection="B"] {
+  background: var(--wash);
+  font-weight: 650;
+}
+.recharge-bar {
+  display: flex;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 2px;
+}
+.recharge-values {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.recharge-results table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.83rem;
+  margin-block: 12px 8px;
+}
+.recharge-results td,
+.recharge-results th {
+  text-align: left;
+  padding: 7px 4px;
+  border-bottom: 1px solid var(--rule);
+}
+.recharge-results td {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.recharge-results thead {
+  background: var(--wash);
+}
+.recharge-actions {
+  margin-top: 10px;
+}
 .map-evidence {
   display: flex;
   gap: 8px 16px;
@@ -543,6 +642,13 @@ footer {
   }
   footer {
     flex-wrap: wrap;
+  }
+}
+@media (max-width: 370px) {
+  .recharge-chart li {
+    grid-template-columns: 7.4em minmax(0, 1fr) 5.7em;
+    gap: 5px;
+    font-size: 0.76rem;
   }
 }
 @media (pointer: coarse) {

@@ -8,7 +8,13 @@ import {
   transectLabel,
   transects,
   validTransect,
-} from "./investigation-data.js?v=0.4.2";
+} from "./investigation-data.js?v=0.5.0";
+import {
+  createRechargeView,
+  rechargeUrl,
+  recordRecharge,
+} from "./recharge-view.js?v=0.5.0";
+import { monthLabel } from "./recharge-data.js";
 
 const map = document.querySelector("#study-map");
 const mapImage = map.querySelector("img");
@@ -51,7 +57,31 @@ let selectedEvidence = null;
 let draft = null;
 let aimingPoint;
 let session;
+let mode = "map";
 const turns = [];
+const rechargeView = createRechargeView();
+const viewButtons = [...document.querySelectorAll("[data-view]")];
+
+function setMode(view) {
+  mode = view;
+  if (view === "recharge" && draft) setDrawing(false);
+  for (const button of viewButtons) {
+    button.setAttribute("aria-pressed", String(button.dataset.view === view));
+  }
+  document.querySelectorAll("[data-for-view]").forEach((section) => {
+    section.hidden = section.dataset.forView !== view;
+  });
+  document.querySelector(".lead").textContent =
+    view === "map"
+      ? "这条线经过村寨和梯田吗？能据此判断它们谁高谁低吗？"
+      : "两个月的补给构成有什么不同？占比上升能说明水量增加吗？";
+  document.querySelector("#question-label").textContent =
+    view === "map" ? "关于当前选线的问题" : "关于当前两个月份的问题";
+}
+
+viewButtons.forEach((button) =>
+  button.addEventListener("click", () => setMode(button.dataset.view)),
+);
 
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -494,19 +524,48 @@ document.querySelector("#export-comparison").addEventListener("click", () => {
   );
 });
 
-document.querySelector("#share-lines").addEventListener("click", async () => {
-  const url = shareUrl(line, reference, location.href, selectedEvidence);
-  clearShareStatus();
+async function copySelection(url, label, status, fallback) {
   try {
     await navigator.clipboard.writeText(url);
-    lineActionStatus.textContent = "已复制读图链接。";
+    status.textContent = "已复制" + label + "链接。";
   } catch {
-    shareFallback.hidden = false;
-    const field = shareFallback.querySelector("input");
+    fallback.hidden = false;
+    const field = fallback.querySelector("input");
     field.value = url;
     field.focus();
     field.select();
   }
+}
+
+document.querySelector("#share-lines").addEventListener("click", () => {
+  clearShareStatus();
+  copySelection(
+    shareUrl(line, reference, location.href, selectedEvidence),
+    "读图",
+    lineActionStatus,
+    shareFallback,
+  );
+});
+
+document.querySelector("#share-months").addEventListener("click", () => {
+  copySelection(
+    rechargeUrl(location.href, rechargeView.selection()),
+    "月份",
+    document.querySelector("#month-share-status"),
+    document.querySelector("#month-share-fallback"),
+  );
+});
+
+document.querySelector("#export-months").addEventListener("click", () => {
+  const months = rechargeView.selection();
+  downloadMarkdown(
+    "Landfold-全福庄水源对照.md",
+    [
+      "# 全福庄小流域 · 水源对照",
+      recordRecharge(months),
+      "[复查两个月份](" + rechargeUrl(publishedInvestigation, months) + ")",
+    ].join("\n\n"),
+  );
 });
 
 presetButtons.forEach((button) =>
@@ -567,6 +626,13 @@ document.addEventListener("keydown", (event) => {
 new ResizeObserver(drawOverlay).observe(map);
 function restoreSharedSelection() {
   const params = new URLSearchParams(location.hash.slice(1));
+  if (params.get("view") === "recharge") {
+    if (!currentSample) setLine(line);
+    rechargeView.render((params.get("months") ?? "").split(","));
+    setMode("recharge");
+    return;
+  }
+  setMode("map");
   reference = readTransect(params.get("reference"));
   setLine(readTransect(params.get("line")) ?? transects.settlement.points);
   const [kind, id] = (params.get("evidence") ?? "").split(":");
@@ -603,7 +669,7 @@ async function checkAvailability() {
     // The static site still supports inspecting the map and original sources.
   }
   status.replaceChildren(
-    "可以直接读图和查阅资料。Agent 对话需要本地启动并配置模型。 ",
+    "Agent 对话需要本地启动并配置模型。 ",
     link(
       "启动说明 ↗",
       "https://github.com/SharkerSwag/Landfold#local-development",
@@ -621,11 +687,21 @@ function addReply(turn) {
   const article = element("article", undefined, "turn");
   const revisit = element(
     "button",
-    "查看本轮选线 · " + turn.lineName,
+    turn.mode === "recharge"
+      ? "查看本轮月份 · " + turn.months.map(monthLabel).join(" / ")
+      : "查看本轮选线 · " + transectLabel(turn.points),
     "turn-line",
   );
   revisit.type = "button";
   revisit.addEventListener("click", () => {
+    setMode(turn.mode);
+    if (turn.mode === "recharge") {
+      rechargeView.render(turn.months);
+      const title = document.querySelector("#recharge-title");
+      title.focus({ preventScroll: true });
+      title.scrollIntoView({ block: "start" });
+      return;
+    }
     reference = turn.reference;
     setLine(turn.points);
     map.scrollIntoView({ block: "nearest" });
@@ -649,6 +725,7 @@ function addReply(turn) {
       const text = classes[id].name + " " + readings.counts[id] + " 点";
       group.append(
         evidenceButton(text, label + "的" + text, () => {
+          setMode("map");
           reference = turn.reference;
           setLine(turn.points);
           showEvidence(kind, id);
@@ -703,17 +780,22 @@ form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const question = questionInput.value.trim();
   if (!question || questionInput.readOnly) return;
-  if (draft) {
+  if (mode === "map" && draft) {
     questionStatus.textContent = "请完成选线后再提问。";
     return;
   }
-  const points = line;
-  const comparisonLine = reference;
-  const currentLineName = transectLabel(points);
+  const selection =
+    mode === "map"
+      ? { mode, points: line, reference }
+      : { mode, months: rechargeView.selection() };
+  const selectionName =
+    mode === "map"
+      ? transectLabel(line)
+      : selection.months.map(monthLabel).join(" / ");
   const submit = form.querySelector('[type="submit"]');
   submit.disabled = true;
   questionInput.readOnly = true;
-  questionStatus.textContent = "正在查证「" + currentLineName + "」…";
+  questionStatus.textContent = "正在查证「" + selectionName + "」…";
   try {
     const response = await fetch(endpoint, {
       method: "POST",
@@ -721,8 +803,7 @@ form.addEventListener("submit", async (event) => {
       body: JSON.stringify({
         session,
         question,
-        points,
-        reference: comparisonLine,
+        ...selection,
       }),
     });
     const result = await response.json();
@@ -732,9 +813,7 @@ form.addEventListener("submit", async (event) => {
     const turn = {
       ...result,
       question,
-      points,
-      reference: comparisonLine,
-      lineName: currentLineName,
+      ...selection,
     };
     turns.push(turn);
     addReply(turn);
@@ -760,11 +839,20 @@ exportButton.addEventListener("click", () => {
         .join("\n");
       return [
         "## " + turn.question,
-        recordLine(turn.points, "当前线"),
-        ...(turn.reference ? [recordLine(turn.reference, "对照线")] : []),
-        "[复查本轮选线与对照](" +
-          shareUrl(turn.points, turn.reference, publishedInvestigation) +
-          ")",
+        ...(turn.mode === "recharge"
+          ? [
+              recordRecharge(turn.months),
+              "[复查本轮月份](" +
+                rechargeUrl(publishedInvestigation, turn.months) +
+                ")",
+            ]
+          : [
+              recordLine(turn.points, "当前线"),
+              ...(turn.reference ? [recordLine(turn.reference, "对照线")] : []),
+              "[复查本轮选线与对照](" +
+                shareUrl(turn.points, turn.reference, publishedInvestigation) +
+                ")",
+            ]),
         turn.answer,
         sources,
       ].join("\n\n");

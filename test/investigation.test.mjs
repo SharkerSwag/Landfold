@@ -9,6 +9,12 @@ import {
   transects,
 } from "../docs/investigation-data.js";
 import { agentRoute } from "../server/agent-route.mjs";
+import {
+  compareRecharge,
+  defaultRechargeSelection,
+  rechargeMonths,
+  validRechargeSelection,
+} from "../docs/recharge-data.js";
 
 async function start(t, handler) {
   const server = http.createServer(handler).listen(0, "127.0.0.1");
@@ -57,27 +63,53 @@ test("shared coordinates restore the exact line and sample positions", () => {
   assert.equal(readTransect("0,0,,.5"), null);
 });
 
-test("each turn reads the current line and retains earlier tool results", async (t) => {
+test("recharge data preserves the source values and calculates signed changes", () => {
+  assert.equal(rechargeMonths.length, 12);
+  assert.ok(rechargeMonths.every((row) => row.rain + row.groundwater === 100));
+  const { first, second, secondMinusFirst } = compareRecharge(
+    defaultRechargeSelection,
+  );
+  assert.deepEqual(
+    [first.rain, first.groundwater, second.rain, second.groundwater],
+    [96, 4, 22, 78],
+  );
+  assert.deepEqual(secondMinusFirst, {
+    rainPercentagePoints: -74,
+    groundwaterPercentagePoints: 74,
+  });
+  assert.equal(
+    compareRecharge([...defaultRechargeSelection].reverse()).secondMinusFirst
+      .groundwaterPercentagePoints,
+    -74,
+  );
+  assert.equal(validRechargeSelection(["2015-07", "2015-07"]), false);
+  assert.equal(validRechargeSelection(["2015-07", "2017-01"]), false);
+});
+
+test("each turn reads its active view and retains earlier tool results", async (t) => {
   const observed = [];
   let correctedCitation = false;
   const model = await start(t, async (req, res) => {
     const chunks = [];
     for await (const chunk of req) chunks.push(chunk);
-    const { messages } = JSON.parse(Buffer.concat(chunks));
+    const { messages, tools } = JSON.parse(Buffer.concat(chunks));
     const lastUser = messages.findLastIndex(
       (message) => message.role === "user",
     );
     const results = messages
       .slice(lastUser + 1)
       .filter((message) => message.role === "tool");
-    const { referenceLine } = JSON.parse(messages[lastUser].content);
-    const names = referenceLine
-      ? [
-          "sample_current_transect",
-          "sample_reference_transect",
-          "lookup_evidence",
-        ]
-      : ["sample_current_transect", "lookup_evidence"];
+    const { mode, referenceLine } = JSON.parse(messages[lastUser].content);
+    const isRecharge = mode === "recharge";
+    const names = isRecharge
+      ? ["compare_recharge_months", "lookup_evidence"]
+      : referenceLine
+        ? [
+            "sample_current_transect",
+            "sample_reference_transect",
+            "lookup_evidence",
+          ]
+        : ["sample_current_transect", "lookup_evidence"];
     let message;
     if (results.length < names.length) {
       const name = names[results.length];
@@ -89,7 +121,10 @@ test("each turn reads the current line and retains earlier tool results", async 
             type: "function",
             function: {
               name,
-              arguments: name === "lookup_evidence" ? '{"id":"region"}' : "{}",
+              arguments:
+                name === "lookup_evidence"
+                  ? JSON.stringify({ id: isRecharge ? "recharge" : "region" })
+                  : "{}",
             },
           },
         ],
@@ -106,8 +141,13 @@ test("each turn reads the current line and retains earlier tool results", async 
           .filter((entry) => entry.role === "tool").length,
         sample: JSON.parse(results[0].content),
         reference: referenceLine ? JSON.parse(results[1].content) : null,
+        tools: tools.map((entry) => entry.function.name),
       });
-      message = { content: "接口测试应答 [region]" };
+      message = {
+        content: isRecharge
+          ? "接口测试应答 [recharge]"
+          : "接口测试应答 [region]",
+      };
     }
     res
       .writeHead(200, { "Content-Type": "application/json" })
@@ -117,25 +157,26 @@ test("each turn reads the current line and retains earlier tool results", async 
     t,
     agentRoute({ endpoint: model, key: "test-only", model: "test-only" }),
   );
-  async function ask(points, session, reference) {
+  async function ask(selection, session) {
     const response = await fetch(service, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         question: "这条线经过村寨吗？",
-        points,
         session,
-        reference,
+        ...selection,
       }),
     });
     assert.equal(response.status, 200);
     return response.json();
   }
-  const first = await ask(transects.settlement.points);
+  const first = await ask({ points: transects.settlement.points });
   const second = await ask(
-    transects.terraces.points,
+    {
+      points: transects.terraces.points,
+      reference: transects.settlement.points,
+    },
     first.session,
-    transects.settlement.points,
   );
   assert.equal(second.session, first.session);
   assert.deepEqual(
@@ -156,4 +197,22 @@ test("each turn reads the current line and retains earlier tool results", async 
   );
   assert.equal(observed[1].earlierResults, 2);
   assert.equal(correctedCitation, true);
+  const third = await ask(
+    { mode: "recharge", months: defaultRechargeSelection },
+    first.session,
+  );
+  assert.equal(third.session, first.session);
+  assert.deepEqual(
+    third.trace.map((step) => step.name),
+    ["比较水源补给", "查阅资料"],
+  );
+  assert.deepEqual(observed[2].tools, [
+    "compare_recharge_months",
+    "lookup_evidence",
+  ]);
+  assert.equal(
+    observed[2].sample.secondMinusFirst.groundwaterPercentagePoints,
+    74,
+  );
+  assert.equal(observed[2].earlierResults, 5);
 });

@@ -1,4 +1,5 @@
 import { landCover } from "./land-cover.js";
+import { rechargeSource } from "./recharge-data.js";
 
 export const classes = {
   t: { name: "梯田", color: "#6edcf3" },
@@ -31,6 +32,7 @@ export const study = {
 };
 
 export const evidence = {
+  recharge: rechargeSource,
   map: {
     title: "全福庄小流域土地利用图",
     source: study.authors + "，图 1c",

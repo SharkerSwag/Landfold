@@ -2,11 +2,12 @@
 
 ## Quanfuzhuang investigation
 
-- Chengjing Liu, Yuanmei Jiao, Qiue Xu, Zhilin Liu and Yinping Ding, *Temp-Spatial Heterogeneity of Water Recharge and Its Stable Mechanisms of the Mountainous Rice Terraces in East Asia Monsoon Region*, Water 2022, 14(24), 4110.
+- Chengjing Liu, Yuanmei Jiao, Qiue Xu, Zhilin Liu and Yinping Ding, _Temp-Spatial Heterogeneity of Water Recharge and Its Stable Mechanisms of the Mountainous Rice Terraces in East Asia Monsoon Region_, Water 2022, 14(24), 4110.
 - Source: https://doi.org/10.3390/w14244110
 - License: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 - `docs/assets/quanfuzhuang-map.png` and `docs/assets/quanfuzhuang-photo.png` are the original figure files for Figures 1 and 3. The page frames the detailed map inset of Figure 1c and the field photograph of Figure 3d with CSS.
 - `docs/land-cover.js` is derived from Figure 1c by sampling the colors of the publication's mapped land-use categories inside an approximate trace of the detailed inset frame. The derivation is reproducible with `scripts/derive-land-cover.py`. The resulting grid retains image coordinates and omits georeferencing. Map ink, locations outside the inset and colors outside the class tolerances are unclassified.
+- `docs/recharge-data.js` transcribes the two monthly recharge shares in Table 2. Year labels follow the May 2015 to April 2016 sampling dates in §3.1. Displayed differences are calculated by Landfold.
 
 The two terrace originals below are distributed unchanged. The village image is a Wikimedia-generated resized rendition retaining the complete composition. The website may crop images for display and add separate HTML observation markers. Each local file can also be viewed without cropping, and each source page links to the original. Attribution and license links are visible in the website.
 

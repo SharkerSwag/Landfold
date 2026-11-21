@@ -4,6 +4,11 @@ import {
   evidence,
   sampleTransect,
 } from "../docs/investigation-data.js";
+import {
+  compareRecharge,
+  monthLabel,
+  rechargeSource,
+} from "../docs/recharge-data.js";
 
 const skill = readFileSync(
   new URL("../skills/check-transect/SKILL.md", import.meta.url),
@@ -30,6 +35,10 @@ const tools = [
   tool(
     "sample_reference_transect",
     "Read the reference line pinned by the user on Figure 1c. Use only to compare with the current line when a reference is attached.",
+  ),
+  tool(
+    "compare_recharge_months",
+    "Read published recharge proportions for the two months selected in this turn and calculate the changes in percentage points.",
   ),
   tool(
     "lookup_evidence",
@@ -68,7 +77,7 @@ export function modelConfig(env = process.env) {
   };
 }
 
-async function complete(config, messages, toolChoice) {
+async function complete(config, messages, toolChoice, activeTools) {
   const response = await fetch(config.endpoint, {
     method: "POST",
     headers: {
@@ -78,7 +87,7 @@ async function complete(config, messages, toolChoice) {
     body: JSON.stringify({
       model: config.model,
       messages,
-      tools,
+      tools: activeTools,
       tool_choice: toolChoice,
       max_tokens: 1000,
       ...(config.deepseek ? { thinking: { type: "disabled" } } : {}),
@@ -117,16 +126,32 @@ export async function investigate({
   config,
   history,
   question,
+  mode = "map",
   points,
   reference = null,
+  months,
 }) {
+  const recharge = mode === "recharge";
+  const currentTool = recharge
+    ? "compare_recharge_months"
+    : "sample_current_transect";
+  const activeTools = tools.filter(
+    ({ function: specification }) =>
+      specification.name === "lookup_evidence" ||
+      specification.name === currentTool ||
+      (!recharge &&
+        reference &&
+        specification.name === "sample_reference_transect"),
+  );
   const turn = [
     {
       role: "user",
       content: JSON.stringify({
+        mode,
         question,
-        currentLine: points,
-        referenceLine: reference,
+        ...(recharge
+          ? { selectedMonths: months }
+          : { currentLine: points, referenceLine: reference }),
       }),
     },
   ];
@@ -136,6 +161,8 @@ export async function investigate({
   let sampledReference = false;
   let correction = "";
   let toolChoice = "auto";
+  const requiredCitation = () =>
+    recharge ? citations.has("recharge") : citations.size > 0;
   for (let round = 0; round < 6; round++) {
     const message = await complete(
       config,
@@ -143,7 +170,7 @@ export async function investigate({
         {
           role: "system",
           content:
-            "你是 Landfold 全福庄地理探究助手。按下列 Skill 查证。用户问题中的‘这条线’指本轮 currentLine。\n\n" +
+            "你是 Landfold 全福庄地理探究助手。按下列 Skill 查证，以本轮 mode 和选择为准。\n\n" +
             skill +
             correction,
         },
@@ -151,20 +178,26 @@ export async function investigate({
         ...turn,
       ],
       toolChoice,
+      activeTools,
     );
     const calls = message.tool_calls ?? [];
     if (!Array.isArray(calls) || calls.length > 6)
       throw new Error("模型返回的工具请求超出范围。");
     if (calls.length === 0) {
       const missingTool = !sampled
-        ? "sample_current_transect"
+        ? currentTool
         : reference && !sampledReference
           ? "sample_reference_transect"
-          : citations.size === 0
+          : !requiredCitation()
             ? "lookup_evidence"
             : null;
       if (missingTool) {
-        correction = "\n本轮还需调用 " + missingTool + "。";
+        correction =
+          "\n本轮还需调用 " +
+          missingTool +
+          (recharge && missingTool === "lookup_evidence"
+            ? "，id 使用 recharge。"
+            : "。");
         toolChoice = { type: "function", function: { name: missingTool } };
         continue;
       }
@@ -173,11 +206,15 @@ export async function investigate({
       const ids = [...answer.matchAll(/\[([a-z]+)\]/g)].map(
         (match) => match[1],
       );
-      if (!ids.length || ids.some((id) => !citations.has(id))) {
+      if (
+        !ids.length ||
+        ids.some((id) => !citations.has(id)) ||
+        (recharge && !ids.includes("recharge"))
+      ) {
         correction =
           "\n请引用本轮工具实际返回的资料 ID。可用 ID：" +
           [...citations.keys()].map((id) => "[" + id + "]").join("、") +
-          "。";
+          (recharge ? "。月份数值需要引用 [recharge]。" : "。");
         toolChoice = "none";
         continue;
       }
@@ -195,14 +232,26 @@ export async function investigate({
     for (const call of calls) {
       const name = call.function?.name;
       let result = { error: "工具名称或参数无效。" };
-      if (name === "sample_current_transect") {
+      if (name === "compare_recharge_months" && recharge) {
+        result = {
+          ...compareRecharge(months),
+          sourceEvidenceId: "recharge",
+          unit: "月度补给占比为百分比，变化为百分点。",
+          limit: rechargeSource.limit,
+        };
+        sampled = true;
+        trace.push({
+          name: "比较水源补给",
+          detail: months.map(monthLabel).join(" / "),
+        });
+      } else if (name === "sample_current_transect" && !recharge) {
         result = traceLine(points);
         sampled = true;
         trace.push({
           name: "读取当前选线",
           detail: result.count + " 个采样点",
         });
-      } else if (name === "sample_reference_transect") {
+      } else if (name === "sample_reference_transect" && !recharge) {
         result = { error: "本轮没有固定对照线。" };
         if (reference) {
           result = traceLine(reference);
@@ -229,7 +278,8 @@ export async function investigate({
         content: JSON.stringify(result),
       });
     }
-    const ready = sampled && (!reference || sampledReference) && citations.size;
+    const ready =
+      sampled && (!reference || sampledReference) && requiredCitation();
     toolChoice = ready && round >= 3 ? "none" : "auto";
     correction = ready
       ? "\n本轮已取得基础证据。若当前问题需要另一资料，可继续查阅。使用已有工具结果，避免重复调用。"

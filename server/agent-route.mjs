@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { investigate } from "./agent.mjs";
 import { validTransect } from "../docs/investigation-data.js";
+import { validRechargeSelection } from "../docs/recharge-data.js";
 
 const maxBody = 8192;
 const ttl = 60 * 60 * 1000;
@@ -57,14 +58,29 @@ export function agentRoute(config) {
     }
     const question =
       typeof data?.question === "string" ? data.question.trim() : "";
-    if (!question || question.length > 1200 || !validTransect(data.points)) {
+    if (!question || question.length > 1200) {
       return json(response, 400, {
-        error: "请选好一条线，并输入 1200 字以内的问题。",
+        error: "请输入 1200 字以内的问题。",
       });
     }
-    const reference = data.reference ?? null;
-    if (reference !== null && !validTransect(reference)) {
-      return json(response, 400, { error: "对照线无效，请重新固定一条线。" });
+    const mode = data.mode ?? "map";
+    let selection;
+    if (mode === "recharge") {
+      if (!validRechargeSelection(data.months)) {
+        return json(response, 400, { error: "请选取两个不同的研究月份。" });
+      }
+      selection = { mode, months: data.months };
+    } else if (mode === "map") {
+      const reference = data.reference ?? null;
+      if (
+        !validTransect(data.points) ||
+        (reference !== null && !validTransect(reference))
+      ) {
+        return json(response, 400, { error: "请检查当前选线和对照线。" });
+      }
+      selection = { mode, points: data.points, reference };
+    } else {
+      return json(response, 400, { error: "探究方式无效。" });
     }
     const now = Date.now();
     for (const [id, session] of sessions) {
@@ -82,8 +98,7 @@ export function agentRoute(config) {
         config,
         history,
         question,
-        points: data.points,
-        reference,
+        ...selection,
       });
       sessions.delete(id);
       sessions.set(id, {
