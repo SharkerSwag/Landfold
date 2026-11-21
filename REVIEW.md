@@ -1,5 +1,13 @@
 # Landfold iteration reviews
 
+## 0.4.1 · 2026-11-21
+
+Review task: open the investigation and find the map, selection controls, current results and Agent without searching through the introduction.
+
+- The tinted 0.4.0 layout still read like a long-form article. The white layout moves the map and its controls up, puts results beside the map and keeps study photographs in the evidence section.
+- Readability and interaction: **4 / 5**. The hierarchy is clearer on desktop. On mobile, the map and results still require vertical scrolling. The published figure's labels are dense at small sizes.
+- Verified white backgrounds and the select, pin, compare, share and export workflow in Chrome at 320–1440 pixels. The local DeepSeek form and the public evidence browser use the same layout.
+
 ## 0.4.0 · 2026-11-21
 
 Review task: use the public page to determine which of two lines sampled a settlement, check why that result cannot establish elevation, and give someone else enough information to reproduce the reading.

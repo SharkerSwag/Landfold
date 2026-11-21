@@ -8,7 +8,7 @@ import {
   transectLabel,
   transects,
   validTransect,
-} from "./investigation-data.js";
+} from "./investigation-data.js?v=0.4.1";
 
 const map = document.querySelector("#study-map");
 const mapImage = map.querySelector("img");
@@ -163,27 +163,34 @@ function updateSample() {
 }
 
 function renderComparison() {
-  comparison.hidden = !reference;
+  const referenceColumn = document.querySelector("#reference-column");
+  referenceColumn.hidden = !reference;
+  document.querySelector("#export-comparison").hidden = !reference;
   clearButton.hidden = !reference;
   pinButton.textContent = reference ? "以当前线替换对照" : "固定当前线作对照";
-  if (!reference) return;
-  const other = sampleTransect(reference);
+  const other = reference ? sampleTransect(reference) : null;
   document.querySelector("#current-column").textContent =
     "当前 · " + transectLabel(line);
-  document.querySelector("#reference-column").textContent =
-    "对照 · " + transectLabel(reference);
+  referenceColumn.textContent = reference
+    ? "对照 · " + transectLabel(reference)
+    : "";
   const rows = Object.entries(classes).map(([id, type]) => {
     const row = element("tr");
     const name = element("th", type.name);
     name.scope = "row";
+    const swatch = element("span", "", "swatch");
+    swatch.setAttribute("aria-hidden", "true");
+    swatch.style.background = type.color;
+    name.prepend(swatch);
     row.append(
       name,
       element("td", currentSample.counts[id] + " / " + currentSample.count),
-      element("td", other.counts[id] + " / " + other.count),
     );
+    if (other)
+      row.append(element("td", other.counts[id] + " / " + other.count));
     return row;
   });
-  document.querySelector("#comparison-rows").replaceChildren(...rows);
+  comparison.querySelector("tbody").replaceChildren(...rows);
 }
 
 function renderLine() {

@@ -1,9 +1,9 @@
 @charset "UTF-8";
 :root {
-  --paper: #f3f7fa;
+  --paper: #ffffff;
   --ink: #243c34;
   --muted: #546773;
-  --line: #cbd8df;
+  --line: #dadde1;
   --accent: #2f657e;
   --serif:
     "Noto Serif SC", "Source Han Serif SC", "STZhongsong", "SimSun", serif;
@@ -216,7 +216,7 @@ a:focus-visible {
   margin: 0;
 }
 .cover-title h1 span {
-  color: #f3f7fa;
+  color: #ffffff;
   text-shadow: 0 1px 12px #19393c25;
 }
 .title-small {
@@ -225,7 +225,7 @@ a:focus-visible {
   letter-spacing: 0.26em;
   line-height: 1.8;
   margin-top: 26px;
-  color: #f3f7fa;
+  color: #ffffff;
   text-shadow: 0 1px 8px #19393c;
 }
 .side-writing {
@@ -259,7 +259,7 @@ a:focus-visible {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: #f3f7faee;
+  background: #ffffffee;
   border: 1px solid #ffffffe6;
   color: #173d2c;
   font: 10px var(--mono);
@@ -345,7 +345,7 @@ a:focus-visible {
   backdrop-filter: blur(10px);
 }
 .scene-controls button[aria-pressed="true"] {
-  background: #e7eff5;
+  background: #f5f5f5;
   color: #243c32;
 }
 .observation-panel {
@@ -354,7 +354,7 @@ a:focus-visible {
   bottom: 100px;
   width: 340px;
   padding: 26px 29px 22px;
-  background: #edf4f8f2;
+  background: #fffffff2;
   color: var(--ink);
   z-index: 6;
   box-shadow: 0 12px 55px #10292430;
@@ -623,7 +623,7 @@ dialog::backdrop {
   padding: 12px 23px;
   max-width: 90%;
   background: #203d31;
-  color: #f3f7fa;
+  color: #ffffff;
   border: 1px solid #ffffff35;
   font-size: 11px;
   letter-spacing: 0.08em;
