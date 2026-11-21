@@ -20,7 +20,9 @@ The chosen B cover remains the visual anchor. The objective is a complete first 
 1. Use the land-use map and field photography from the same study to ask a verifiable local question.
 2. Sample two preset lines and arbitrary lines on the published figure. Keep its image-coordinate scope visible and distinguish land use from elevation.
 3. Run the model tool loop and the verification Skill locally. Verify that changing the line changes the tool result while preserving prior conversation context.
-4. Evaluate a live model's interpretation with a question about altitude after credentials are configured. Add georeferenced data for altitude comparisons when a reliable spatial match is available.
+4. Evaluate the DeepSeek response against the two preset lines, including a follow-up on what the map can establish about elevation.
+5. Make the selection reproducible with side-by-side counts, shareable lines and a downloadable record.
+6. For the next release, prioritize reliable spatial alignment for elevation comparisons and a second documented investigation question. Record release checks and unresolved gaps in [REVIEW.md](REVIEW.md).
 
 ## Acceptance criteria
 

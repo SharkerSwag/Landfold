@@ -5,11 +5,11 @@
 }
 :root {
   color-scheme: light;
-  --paper: #f4f2e8;
-  --ink: #20372c;
-  --forest: #213c31;
-  --rule: #cbd2c4;
-  --muted: #526255;
+  --paper: #f1f6fa;
+  --ink: #203645;
+  --forest: #203b4c;
+  --rule: #c8d6df;
+  --muted: #4b606e;
   --serif: "Landfold Serif", "Noto Serif SC", SimSun, serif;
   background: var(--paper);
   color: var(--ink);
@@ -54,7 +54,7 @@ button:disabled {
 }
 .masthead {
   background: var(--forest);
-  color: #f4f2e8;
+  color: #f1f6fa;
 }
 .masthead nav,
 .opening,
@@ -68,7 +68,7 @@ footer {
   gap: 20px;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #f4f2e834;
+  border-bottom: 1px solid #f1f6fa34;
   font-size: 0.85rem;
 }
 .wordmark {
@@ -96,7 +96,7 @@ footer {
 .introduction p:first-child,
 figcaption {
   font-size: 0.8rem;
-  color: #d0ddce;
+  color: #d0e2ed;
 }
 .introduction p:last-child {
   max-width: 29rem;
@@ -221,9 +221,95 @@ h3 {
     serif;
 }
 #profile-strip {
+  position: relative;
   display: flex;
   width: 100%;
   height: 16px;
+}
+#profile-strip::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: var(--sample-position, 50%);
+  width: 2px;
+  background: var(--ink);
+  box-shadow: 0 0 0 1px #fcfdff;
+  transform: translateX(-50%);
+}
+.sample-control {
+  display: grid;
+  gap: 2px;
+  margin-block: 10px 12px;
+  font-size: 0.85rem;
+}
+.sample-control span {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.sample-control output {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.sample-control input {
+  width: 100%;
+  min-height: 30px;
+  margin: 0;
+  accent-color: var(--forest);
+}
+.compare-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block: 16px 8px;
+}
+.compare-actions button {
+  font-size: 0.85rem;
+}
+.share-fallback {
+  display: grid;
+  gap: 5px;
+  font-size: 0.85rem;
+}
+.share-fallback input {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid var(--rule);
+  font: inherit;
+}
+#comparison {
+  margin-bottom: 25px;
+  padding-block: 14px;
+  border-block: 1px solid var(--rule);
+}
+#line-action-status:not(:empty) {
+  margin-bottom: 8px;
+}
+.study-map:focus-visible {
+  outline-offset: 2px;
+}
+#comparison table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin-block: 8px;
+}
+#comparison th,
+#comparison td {
+  padding: 6px 3px;
+  text-align: left;
+  border-bottom: 1px solid var(--rule);
+}
+#comparison th {
+  font-weight: 500;
+}
+#comparison td {
+  font-variant-numeric: tabular-nums;
+}
+#export-comparison {
+  margin-top: 10px;
+  font-size: 0.85rem;
 }
 .class-counts {
   display: flex;
@@ -243,7 +329,7 @@ h3 {
   display: inline-block;
   width: 0.72em;
   height: 0.72em;
-  border: 1px solid #20372c44;
+  border: 1px solid #20364544;
 }
 .caption {
   max-width: 65ch;
@@ -318,7 +404,13 @@ summary {
 }
 .answer {
   margin-top: 12px;
-  white-space: pre-wrap;
+}
+.answer p + p {
+  margin-top: 10px;
+}
+.answer-source {
+  color: #2f657e;
+  overflow-wrap: anywhere;
 }
 .turn details {
   margin-top: 9px;
@@ -345,7 +437,7 @@ summary {
 }
 textarea {
   border: 1px solid var(--rule);
-  background: #fffdf5;
+  background: #fcfdff;
   padding: 9px;
   border-radius: 3px;
   width: 100%;

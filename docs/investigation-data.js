@@ -5,7 +5,7 @@ export const classes = {
   f: { name: "森林", color: "#49b470" },
   v: { name: "村寨", color: "#f49f63" },
   o: { name: "其他", color: "#b4b4b4" },
-  "?": { name: "未判读", color: "#e8e5dc" },
+  "?": { name: "未判读", color: "#e4eaf0" },
 };
 
 export const transects = {
@@ -95,15 +95,41 @@ export function sampleTransect(points) {
     Math.ceil(Math.hypot((x1 - x0) * columns, (y1 - y0) * rows)),
   );
   const sequence = Array.from({ length: count }, (_, index) => {
-    const t = (index + 0.5) / count;
-    const column = Math.min(
-      columns - 1,
-      Math.floor((x0 + t * (x1 - x0)) * columns),
-    );
-    const row = Math.min(rows - 1, Math.floor((y0 + t * (y1 - y0)) * rows));
+    const [x, y] = samplePosition(points, count, index);
+    const column = Math.min(columns - 1, Math.floor(x * columns));
+    const row = Math.min(rows - 1, Math.floor(y * rows));
     return landCover[row][column];
   });
   const counts = Object.fromEntries(Object.keys(classes).map((id) => [id, 0]));
   for (const id of sequence) counts[id]++;
   return { count, counts, sequence };
+}
+
+export function samplePosition([[x0, y0], [x1, y1]], count, index) {
+  const t = (index + 0.5) / count;
+  return [x0 + t * (x1 - x0), y0 + t * (y1 - y0)];
+}
+
+export function transectLabel(points) {
+  return (
+    Object.values(transects).find(({ points: preset }) =>
+      points.every((point, i) =>
+        point.every((coordinate, j) => coordinate === preset[i][j]),
+      ),
+    )?.label ?? "自选线"
+  );
+}
+
+export function readTransect(value) {
+  if (
+    !value ||
+    !/^(?:\d+(?:\.\d+)?|\.\d+)(?:,(?:\d+(?:\.\d+)?|\.\d+)){3}$/.test(value)
+  )
+    return null;
+  const [x0, y0, x1, y1] = value.split(",").map(Number);
+  const points = [
+    [x0, y0],
+    [x1, y1],
+  ];
+  return validTransect(points) ? points : null;
 }

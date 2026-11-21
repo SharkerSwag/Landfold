@@ -1,10 +1,10 @@
 @charset "UTF-8";
 :root {
-  --paper: #f3f0e8;
+  --paper: #f3f7fa;
   --ink: #243c34;
-  --muted: #747d70;
-  --line: #d4d8ca;
-  --accent: #8c583a;
+  --muted: #546773;
+  --line: #cbd8df;
+  --accent: #2f657e;
   --serif:
     "Noto Serif SC", "Source Han Serif SC", "STZhongsong", "SimSun", serif;
   --sans: "Microsoft YaHei", "PingFang SC", sans-serif;
@@ -216,7 +216,7 @@ a:focus-visible {
   margin: 0;
 }
 .cover-title h1 span {
-  color: #f3f0e8;
+  color: #f3f7fa;
   text-shadow: 0 1px 12px #19393c25;
 }
 .title-small {
@@ -225,7 +225,7 @@ a:focus-visible {
   letter-spacing: 0.26em;
   line-height: 1.8;
   margin-top: 26px;
-  color: #f3f0e8;
+  color: #f3f7fa;
   text-shadow: 0 1px 8px #19393c;
 }
 .side-writing {
@@ -259,7 +259,7 @@ a:focus-visible {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: #f4f1e5ee;
+  background: #f3f7faee;
   border: 1px solid #ffffffe6;
   color: #173d2c;
   font: 10px var(--mono);
@@ -280,7 +280,7 @@ a:focus-visible {
   border-color: #fff;
 }
 .pin[aria-pressed="true"] .pin-number {
-  background: #e8d39c;
+  background: #b9dded;
   color: #233629;
 }
 .pin-label {
@@ -345,7 +345,7 @@ a:focus-visible {
   backdrop-filter: blur(10px);
 }
 .scene-controls button[aria-pressed="true"] {
-  background: #eeeee3;
+  background: #e7eff5;
   color: #243c32;
 }
 .observation-panel {
@@ -354,7 +354,7 @@ a:focus-visible {
   bottom: 100px;
   width: 340px;
   padding: 26px 29px 22px;
-  background: #f2f0e6f2;
+  background: #edf4f8f2;
   color: var(--ink);
   z-index: 6;
   box-shadow: 0 12px 55px #10292430;
@@ -580,7 +580,7 @@ dialog::backdrop {
   max-height: 100%;
   padding: 25px 35px;
   background: #10231ef7;
-  color: #f1efe4;
+  color: #eaf2f8;
   overflow: hidden;
 }
 .photo-dialog[open] {
@@ -623,7 +623,7 @@ dialog::backdrop {
   padding: 12px 23px;
   max-width: 90%;
   background: #203d31;
-  color: #f5f3eb;
+  color: #f3f7fa;
   border: 1px solid #ffffff35;
   font-size: 11px;
   letter-spacing: 0.08em;

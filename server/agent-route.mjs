@@ -62,6 +62,10 @@ export function agentRoute(config) {
         error: "请选好一条线，并输入 1200 字以内的问题。",
       });
     }
+    const reference = data.reference ?? null;
+    if (reference !== null && !validTransect(reference)) {
+      return json(response, 400, { error: "对照线无效，请重新固定一条线。" });
+    }
     const now = Date.now();
     for (const [id, session] of sessions) {
       if (now - session.at > ttl && !busy.has(id)) sessions.delete(id);
@@ -79,6 +83,7 @@ export function agentRoute(config) {
         history,
         question,
         points: data.points,
+        reference,
       });
       sessions.delete(id);
       sessions.set(id, {

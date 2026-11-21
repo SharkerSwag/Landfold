@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#213c31" />
+    <meta name="theme-color" content="#203b4c" />
     <title>全福庄小流域探究 · Landfold 地景志</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="investigate.css" />
@@ -74,6 +74,24 @@
             class="class-counts"
             aria-label="地类采样结果"
           ></ul>
+          <label class="sample-control" for="sample-index">
+            <span
+              >沿线取点 <output id="sample-readout" for="sample-index"></output
+            ></span>
+            <input id="sample-index" type="range" min="1" value="1" step="1" />
+          </label>
+          <div class="compare-actions">
+            <button type="button" id="pin-line">固定当前线作对照</button>
+            <button type="button" id="clear-reference" hidden>
+              移除对照线
+            </button>
+            <button type="button" id="share-lines">复制读图链接</button>
+          </div>
+          <label class="share-fallback" id="share-fallback" hidden>
+            读图链接
+            <input type="url" readonly />
+          </label>
+          <p id="line-action-status" role="status" class="caption"></p>
           <div
             class="study-map"
             id="study-map"
@@ -96,6 +114,24 @@
           </p>
         </section>
         <section class="inquiry" aria-labelledby="inquiry-title">
+          <section id="comparison" aria-labelledby="comparison-title" hidden>
+            <h3 id="comparison-title">两条线的地类对照</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">地类</th>
+                  <th scope="col" id="current-column"></th>
+                  <th scope="col" id="reference-column"></th>
+                </tr>
+              </thead>
+              <tbody id="comparison-rows"></tbody>
+            </table>
+            <p class="caption">
+              分母为各线全部采样点。0
+              点表示沿线未采到该地类。图面位置无法判断海拔高低。
+            </p>
+            <button type="button" id="export-comparison">下载对照记录</button>
+          </section>
           <div class="section-head">
             <h2 id="inquiry-title">查证一个判断</h2>
           </div>

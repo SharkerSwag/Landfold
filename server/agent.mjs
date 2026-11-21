@@ -28,6 +28,10 @@ const tools = [
     "Calculate land-use readings for the current line on Figure 1c. The server reads the current selection.",
   ),
   tool(
+    "sample_reference_transect",
+    "Read the reference line pinned by the user on Figure 1c. Use only to compare with the current line when a reference is attached.",
+  ),
+  tool(
     "lookup_evidence",
     "Fetch the source and limitations of a geographic claim.",
     {
@@ -56,10 +60,15 @@ export function modelConfig(env = process.env) {
       "LANDFOLD_API_BASE must use HTTPS or point to a local HTTP server.",
     );
   }
-  return { model, key, endpoint };
+  return {
+    model,
+    key,
+    endpoint,
+    deepseek: endpoint.hostname === "api.deepseek.com",
+  };
 }
 
-async function complete(config, messages) {
+async function complete(config, messages, toolChoice) {
   const response = await fetch(config.endpoint, {
     method: "POST",
     headers: {
@@ -70,8 +79,11 @@ async function complete(config, messages) {
       model: config.model,
       messages,
       tools,
-      tool_choice: "auto",
+      tool_choice: toolChoice,
+      max_tokens: 1000,
+      ...(config.deepseek ? { thinking: { type: "disabled" } } : {}),
     }),
+    redirect: "error",
     signal: AbortSignal.timeout(35_000),
   });
   if (!response.ok)
@@ -103,39 +115,74 @@ function traceLine(points) {
   };
 }
 
-export async function investigate({ config, history, question, points }) {
+export async function investigate({
+  config,
+  history,
+  question,
+  points,
+  reference = null,
+}) {
   const turn = [
     {
       role: "user",
-      content: JSON.stringify({ question, currentLine: points }),
+      content: JSON.stringify({
+        question,
+        currentLine: points,
+        referenceLine: reference,
+      }),
     },
   ];
   const trace = [];
   const citations = new Map();
   let sampled = false;
+  let sampledReference = false;
   let correction = "";
+  let toolChoice = "auto";
   for (let round = 0; round < 6; round++) {
-    const message = await complete(config, [
-      {
-        role: "system",
-        content:
-          "你是 Landfold 全福庄地理探究助手。按下列 Skill 查证。用户问题中的‘这条线’指本轮 currentLine。\n\n" +
-          skill +
-          correction,
-      },
-      ...history.flat(),
-      ...turn,
-    ]);
+    const message = await complete(
+      config,
+      [
+        {
+          role: "system",
+          content:
+            "你是 Landfold 全福庄地理探究助手。按下列 Skill 查证。用户问题中的‘这条线’指本轮 currentLine。\n\n" +
+            skill +
+            correction,
+        },
+        ...history.flat(),
+        ...turn,
+      ],
+      toolChoice,
+    );
     const calls = message.tool_calls ?? [];
     if (!Array.isArray(calls) || calls.length > 6)
       throw new Error("模型返回的工具请求超出范围。");
     if (calls.length === 0) {
-      if (!sampled || citations.size === 0) {
-        correction = "\n本轮证据尚未查齐。先通过工具读取当前选线和相关来源。";
+      const missingTool = !sampled
+        ? "sample_current_transect"
+        : reference && !sampledReference
+          ? "sample_reference_transect"
+          : citations.size === 0
+            ? "lookup_evidence"
+            : null;
+      if (missingTool) {
+        correction = "\n本轮还需调用 " + missingTool + "。";
+        toolChoice = { type: "function", function: { name: missingTool } };
         continue;
       }
       const answer = message.content?.trim();
       if (!answer) throw new Error("模型没有返回解读。");
+      const ids = [...answer.matchAll(/\[([a-z]+)\]/g)].map(
+        (match) => match[1],
+      );
+      if (!ids.length || ids.some((id) => !citations.has(id))) {
+        correction =
+          "\n请引用本轮工具实际返回的资料 ID。可用 ID：" +
+          [...citations.keys()].map((id) => "[" + id + "]").join("、") +
+          "。";
+        toolChoice = "none";
+        continue;
+      }
       turn.push({ role: "assistant", content: answer });
       return { turn, answer, citations: [...citations.values()], trace };
     }
@@ -157,6 +204,16 @@ export async function investigate({ config, history, question, points }) {
           name: "读取当前选线",
           detail: result.count + " 个采样点",
         });
+      } else if (name === "sample_reference_transect") {
+        result = { error: "本轮没有固定对照线。" };
+        if (reference) {
+          result = traceLine(reference);
+          sampledReference = true;
+          trace.push({
+            name: "读取对照线",
+            detail: result.count + " 个采样点",
+          });
+        }
       } else if (name === "lookup_evidence") {
         let id;
         try {
@@ -174,6 +231,11 @@ export async function investigate({ config, history, question, points }) {
         content: JSON.stringify(result),
       });
     }
+    const ready = sampled && (!reference || sampledReference) && citations.size;
+    toolChoice = ready && round >= 3 ? "none" : "auto";
+    correction = ready
+      ? "\n本轮已取得基础证据。若当前问题需要另一资料，可继续查阅。使用已有工具结果，避免重复调用。"
+      : "";
   }
   throw new Error("模型未在工具调用次数内完成查证，请缩小问题范围后重试。");
 }
