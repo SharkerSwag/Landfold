@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#ffffff" />
     <title>全福庄小流域探究 · Landfold 地景志</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="investigate.css?v=0.4.1" />
-    <script type="module" src="investigate.js?v=0.4.1"></script>
+    <link rel="stylesheet" href="investigate.css?v=0.4.2" />
+    <script type="module" src="investigate.js?v=0.4.2"></script>
   </head>
   <body>
     <header class="masthead">
@@ -25,10 +25,16 @@
         <h1>全福庄小流域</h1>
         <p>在土地利用图上取样，比较村寨、梯田与森林的分布。</p>
       </div>
+      <nav class="section-links" aria-label="探究页面区块">
+        <a href="#map-title">地图</a>
+        <a href="#comparison-title">结果</a>
+        <a href="#inquiry-title">查证</a>
+        <a href="#research-sources">资料</a>
+      </nav>
       <div class="workspace">
         <section class="map-section panel" aria-labelledby="map-title">
           <div class="section-head">
-            <h2 id="map-title">土地利用图</h2>
+            <h2 id="map-title" tabindex="-1">土地利用图</h2>
             <a href="assets/quanfuzhuang-map.png" target="_blank" rel="noopener"
               >查看研究原图 ↗</a
             >
@@ -59,6 +65,10 @@
           </label>
           <p id="line-action-status" role="status" class="caption"></p>
           <p id="map-status" role="status">从 A 到 B 读取沿线地类。</p>
+          <div class="map-evidence" id="map-evidence" hidden>
+            <p id="evidence-readout" role="status"></p>
+            <button type="button" id="clear-evidence">清除定位</button>
+          </div>
           <div
             class="study-map"
             id="study-map"
@@ -107,7 +117,7 @@
             aria-labelledby="comparison-title"
           >
             <div class="section-head">
-              <h2 id="comparison-title">选线结果</h2>
+              <h2 id="comparison-title" tabindex="-1">选线结果</h2>
               <button type="button" id="export-comparison" hidden>
                 下载对照
               </button>
@@ -123,13 +133,13 @@
               <tbody id="comparison-rows"></tbody>
             </table>
             <p class="caption">
-              分母为各线全部采样点。0
-              点表示沿线未采到该地类。图面位置无法判断海拔高低。
+              点击有下划线的读数，在图上定位该地类。分母为各线采样点总数。 0
+              点表示沿线未采到。图面位置无法判断海拔高低。
             </p>
           </section>
           <section class="inquiry panel" aria-labelledby="inquiry-title">
             <div class="section-head">
-              <h2 id="inquiry-title">Agent 查证</h2>
+              <h2 id="inquiry-title" tabindex="-1">Agent 查证</h2>
             </div>
             <p class="lead">
               这条线经过村寨和梯田吗？能据此判断它们谁高谁低吗？
@@ -164,7 +174,7 @@
             </form>
             <p id="question-status" role="status"></p>
           </section>
-          <details class="reading-sources panel">
+          <details class="reading-sources panel" id="research-sources">
             <summary>研究资料与现场照片</summary>
             <div id="study-sources"></div>
             <figure>

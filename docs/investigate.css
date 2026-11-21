@@ -149,6 +149,48 @@ footer {
   padding: 16px;
   min-width: 0;
 }
+.section-links {
+  display: none;
+}
+.map-evidence {
+  display: flex;
+  gap: 8px 16px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  font-size: 0.82rem;
+}
+.map-evidence button {
+  flex-shrink: 0;
+}
+.map-evidence p {
+  overflow-wrap: anywhere;
+}
+.reading-link {
+  min-height: 30px;
+  padding: 0 2px;
+  border: 0;
+  color: var(--accent);
+  font-size: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+.reading-link[aria-pressed="true"] {
+  background: var(--wash);
+  color: var(--ink);
+  font-weight: 650;
+}
+.turn-evidence {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 9px;
+  font-size: 0.8rem;
+}
 .section-head {
   display: flex;
   align-items: center;
@@ -454,6 +496,28 @@ footer {
   font-size: 0.8rem;
 }
 @media (max-width: 760px) {
+  :root {
+    scroll-padding-top: 57px;
+  }
+  .section-links {
+    position: sticky;
+    z-index: 2;
+    top: 0;
+    display: flex;
+    gap: 14px;
+    background: #fff;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 10px;
+  }
+  .section-links a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    padding-inline: 4px;
+    color: var(--ink);
+    font-size: 0.85rem;
+    text-decoration: none;
+  }
   .masthead nav,
   main,
   footer {

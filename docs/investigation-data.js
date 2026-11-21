@@ -101,8 +101,15 @@ export function sampleTransect(points) {
     return landCover[row][column];
   });
   const counts = Object.fromEntries(Object.keys(classes).map((id) => [id, 0]));
-  for (const id of sequence) counts[id]++;
-  return { count, counts, sequence };
+  const runs = [];
+  for (const [index, id] of sequence.entries()) {
+    counts[id]++;
+    const last = runs.at(-1);
+    const point = index + 1;
+    if (last?.id === id) last.endPoint = point;
+    else runs.push({ id, startPoint: point, endPoint: point });
+  }
+  return { count, counts, sequence, runs };
 }
 
 export function samplePosition([[x0, y0], [x1, y1]], count, index) {

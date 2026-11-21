@@ -1,5 +1,14 @@
 # Landfold iteration reviews
 
+## 0.4.2 · 2026-11-21
+
+Review task: on a phone, locate the eight settlement readings on the map, compare the terrace line, and send someone a link that restores the selected evidence.
+
+- In 0.4.1, a reviewer had to scrub individual points or infer where the count came from. Selecting a count now highlights every matching sample range. The comparison fixture places the settlement on points 37–44 of the 55-point reference line, with zero settlement readings on the 45-point current line.
+- The mobile navigation jumps among the map, results, Agent and sources. Early testing found that native jumps overwrote the selection fragment. The revised navigation preserves it. A fresh browser opened the copied link with both lines and the same highlight, and the exported Markdown contained that link.
+- The Agent's map checks restore the line and reference from the relevant turn. The sample range calculation is shared by the interface and server tools. Regression checks verify the range in both A-to-B and reverse order.
+- **Evidence reproducibility: 4.5 / 5. Mobile interaction: 4 / 5.** The viewer can verify counts without interpreting model wording. The source image's labels remain dense on small screens, and the image coordinates still do not provide aligned elevation.
+
 ## 0.4.1 · 2026-11-21
 
 Review task: open the investigation and find the map, selection controls, current results and Agent without searching through the introduction.

@@ -20,7 +20,7 @@ Landfold 通过真实风景摄影、可点击的观察点与有来源的解释�
 - Share a direct link to a selected observation through URL fragments.
 - Use the same experience on desktop and mobile.
 
-The [Quanfuzhuang investigation](https://sharkerswag.github.io/Landfold/investigate.html) lets readers draw a line on a published land-use map, locate each sample on the map, and pin a second line for comparison. A shared link restores both lines, and the comparison can be downloaded as Markdown. The same page enables the DeepSeek Agent when served locally with model credentials.
+The [Quanfuzhuang investigation](https://sharkerswag.github.io/Landfold/investigate.html) lets readers draw a line on a published land-use map, inspect one sample at a time, and pin a second line for comparison. Selecting a count highlights the matching sample ranges. A shared link restores both lines and the highlighted class, and the comparison can be downloaded as Markdown. The same page enables the DeepSeek Agent when served locally with model credentials. Each reply has map checks that restore the selections from that turn.
 
 Notebook data stays in the current browser's local storage, with no upload or cross-device synchronization. If storage is unavailable, the interface reports that notes are session-only and offers export. Clearing website data removes saved notes.
 

@@ -95,19 +95,7 @@ async function complete(config, messages, toolChoice) {
 }
 
 function traceLine(points) {
-  const { count, counts, sequence } = sampleTransect(points);
-  const runs = [];
-  for (const [index, id] of sequence.entries()) {
-    const last = runs.at(-1);
-    const point = index + 1;
-    if (last?.class === classes[id].name) last.endPoint = point;
-    else
-      runs.push({
-        class: classes[id].name,
-        startPoint: point,
-        endPoint: point,
-      });
-  }
+  const { count, counts, runs } = sampleTransect(points);
   return {
     source: "Liu 等，Water 2022，图 1c",
     pointsInMapImage: points,
@@ -116,7 +104,10 @@ function traceLine(points) {
     counts: Object.fromEntries(
       Object.entries(counts).map(([id, number]) => [classes[id].name, number]),
     ),
-    orderedRuns: runs,
+    orderedRuns: runs.map(({ id, ...bounds }) => ({
+      class: classes[id].name,
+      ...bounds,
+    })),
     limit:
       "图面颜色采样，采样点数仅描述这条线。地图坐标归一化，未配准到经纬度，无高程。图中文字、河流符号和未匹配颜色为未判读。",
   };

@@ -23,6 +23,15 @@ test("the two study lines give distinct readings on the published figure", () =>
   assert.ok(settlement.counts.v > 0 && settlement.counts.t > 0);
   assert.ok(terraces.counts.t > 0);
   assert.equal(terraces.counts.v, 0);
+  assert.deepEqual(
+    settlement.runs.filter((run) => run.id === "v"),
+    [{ id: "v", startPoint: 37, endPoint: 44 }],
+  );
+  const reversed = sampleTransect([...transects.settlement.points].reverse());
+  assert.deepEqual(
+    reversed.runs.filter((run) => run.id === "v"),
+    [{ id: "v", startPoint: 12, endPoint: 19 }],
+  );
   assert.equal(
     Object.values(settlement.counts).reduce((a, b) => a + b, 0),
     settlement.count,

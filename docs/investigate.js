@@ -8,7 +8,7 @@ import {
   transectLabel,
   transects,
   validTransect,
-} from "./investigation-data.js?v=0.4.1";
+} from "./investigation-data.js?v=0.4.2";
 
 const map = document.querySelector("#study-map");
 const mapImage = map.querySelector("img");
@@ -39,12 +39,15 @@ const pinButton = document.querySelector("#pin-line");
 const clearButton = document.querySelector("#clear-reference");
 const lineActionStatus = document.querySelector("#line-action-status");
 const shareFallback = document.querySelector("#share-fallback");
-const selectionParams = new URLSearchParams(location.hash.slice(1));
+const evidenceBox = document.querySelector("#map-evidence");
+const evidenceReadout = document.querySelector("#evidence-readout");
+const mapTitle = document.querySelector("#map-title");
 
-let line =
-  readTransect(selectionParams.get("line")) ?? transects.settlement.points;
-let reference = readTransect(selectionParams.get("reference"));
+let line = transects.settlement.points;
+let reference = null;
 let currentSample;
+let referenceSample;
+let selectedEvidence = null;
 let draft = null;
 let aimingPoint;
 let session;
@@ -68,9 +71,12 @@ function link(text, url) {
 function drawOverlay() {
   const { clientWidth: width, clientHeight: height } = map;
   const ratio = devicePixelRatio || 1;
-  canvas.width = Math.round(width * ratio);
-  canvas.height = Math.round(height * ratio);
+  const pixelWidth = Math.round(width * ratio);
+  const pixelHeight = Math.round(height * ratio);
+  if (canvas.width !== pixelWidth) canvas.width = pixelWidth;
+  if (canvas.height !== pixelHeight) canvas.height = pixelHeight;
   context.setTransform(ratio, 0, 0, ratio, 0, 0);
+  context.clearRect(0, 0, width, height);
   const toCanvas = ([x, y]) => [x * width, y * height];
   const display = (draft ?? line).map(toCanvas);
   if (reference && !draft) {
@@ -98,12 +104,42 @@ function drawOverlay() {
     context.strokeStyle = "#203645";
     context.stroke();
   }
-  display.forEach(([x, y], index) => {
+  if (selectedEvidence && !draft) {
+    const { kind, id } = selectedEvidence;
+    const points = kind === "reference" ? reference : line;
+    const sample = kind === "reference" ? referenceSample : currentSample;
+    for (const segment of sample.runs.filter((run) => run.id === id)) {
+      const start = samplePosition(
+        points,
+        sample.count,
+        segment.startPoint - 1,
+      );
+      const end = samplePosition(points, sample.count, segment.endPoint - 1);
+      context.beginPath();
+      context.moveTo(...toCanvas(start));
+      context.lineTo(...toCanvas(end));
+      context.lineCap = "round";
+      context.lineWidth = 10;
+      context.strokeStyle = "#ffffff";
+      context.stroke();
+      context.lineWidth = 6;
+      context.strokeStyle = "#2352c5";
+      context.stroke();
+      for (const point of [start, end]) {
+        context.beginPath();
+        context.arc(...toCanvas(point), 3.75, 0, 2 * Math.PI);
+        context.fillStyle = "#2352c5";
+        context.fill();
+      }
+      context.lineCap = "butt";
+    }
+  }
+  function labelPoint([x, y], text, color) {
     const labelX = Math.min(width - 13, Math.max(13, x));
     const labelY = Math.min(height - 13, Math.max(13, y));
     context.beginPath();
     context.arc(labelX, labelY, 12, 0, 2 * Math.PI);
-    context.fillStyle = "#203645";
+    context.fillStyle = color;
     context.fill();
     context.lineWidth = 2;
     context.strokeStyle = "#fcfdff";
@@ -112,9 +148,19 @@ function drawOverlay() {
     context.font = "bold 13px Georgia";
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.fillText(index === 0 ? "A" : "B", labelX, labelY);
-  });
-  if (!draft && currentSample) {
+    context.fillText(text, labelX, labelY);
+  }
+  display.forEach((point, index) =>
+    labelPoint(point, index === 0 ? "A" : "B", "#203645"),
+  );
+  if (selectedEvidence?.kind === "reference" && !draft) {
+    reference
+      .map(toCanvas)
+      .forEach((point, index) =>
+        labelPoint(point, index === 0 ? "A′" : "B′", "#663c28"),
+      );
+  }
+  if (!draft && currentSample && !selectedEvidence) {
     const point = samplePosition(
       line,
       currentSample.count,
@@ -159,7 +205,82 @@ function updateSample() {
     "--sample-position",
     ((index + 0.5) / currentSample.count) * 100 + "%",
   );
+}
+
+function evidenceButton(text, caption, action) {
+  const button = element("button", text, "reading-link");
+  button.type = "button";
+  button.setAttribute("aria-label", caption);
+  button.addEventListener("click", action);
+  return button;
+}
+
+function renderEvidence() {
+  evidenceBox.hidden = !selectedEvidence;
+  comparison.querySelectorAll("[data-evidence-line]").forEach((button) => {
+    const pressed =
+      button.dataset.evidenceLine === selectedEvidence?.kind &&
+      button.dataset.evidenceClass === selectedEvidence?.id;
+    button.setAttribute("aria-pressed", String(pressed));
+  });
+  if (selectedEvidence) {
+    const { kind, id } = selectedEvidence;
+    const other = kind === "reference";
+    const sample = other ? referenceSample : currentSample;
+    const ranges = sample.runs.filter((run) => run.id === id);
+    const shown = ranges
+      .slice(0, 4)
+      .map(({ startPoint, endPoint }) =>
+        startPoint === endPoint
+          ? String(startPoint)
+          : startPoint + "–" + endPoint,
+      );
+    evidenceReadout.textContent =
+      (other ? "对照线 A′ → B′" : "当前线 A → B") +
+      " · " +
+      classes[id].name +
+      " · 第 " +
+      shown.join("、") +
+      " 点" +
+      (ranges.length > shown.length ? "等 " + ranges.length + " 段" : "");
+  } else {
+    evidenceReadout.textContent = "";
+  }
   drawOverlay();
+}
+
+function showEvidence(kind, id, goToMap = true) {
+  if (kind !== "current" && kind !== "reference") return;
+  if (!Object.hasOwn(classes, id)) return;
+  const sample = kind === "reference" ? referenceSample : currentSample;
+  if (!sample?.counts[id]) return;
+  if (draft) setDrawing(false);
+  selectedEvidence = { kind, id };
+  renderEvidence();
+  if (goToMap) {
+    mapTitle.focus({ preventScroll: true });
+    mapTitle.scrollIntoView({ block: "start" });
+  }
+}
+
+function resultCell(sample, kind, id) {
+  const count = sample.counts[id];
+  const text = count + " / " + sample.count;
+  const cell = element("td");
+  if (!count) {
+    cell.textContent = text;
+    return cell;
+  }
+  const label = kind === "current" ? "当前线" : "对照线";
+  const button = evidenceButton(
+    text,
+    "定位" + label + "的" + classes[id].name + " · " + text,
+    () => showEvidence(kind, id),
+  );
+  button.dataset.evidenceLine = kind;
+  button.dataset.evidenceClass = id;
+  cell.append(button);
+  return cell;
 }
 
 function renderComparison() {
@@ -168,7 +289,7 @@ function renderComparison() {
   document.querySelector("#export-comparison").hidden = !reference;
   clearButton.hidden = !reference;
   pinButton.textContent = reference ? "以当前线替换对照" : "固定当前线作对照";
-  const other = reference ? sampleTransect(reference) : null;
+  referenceSample = reference ? sampleTransect(reference) : null;
   document.querySelector("#current-column").textContent =
     "当前 · " + transectLabel(line);
   referenceColumn.textContent = reference
@@ -182,15 +303,13 @@ function renderComparison() {
     swatch.setAttribute("aria-hidden", "true");
     swatch.style.background = type.color;
     name.prepend(swatch);
-    row.append(
-      name,
-      element("td", currentSample.counts[id] + " / " + currentSample.count),
-    );
-    if (other)
-      row.append(element("td", other.counts[id] + " / " + other.count));
+    row.append(name, resultCell(currentSample, "current", id));
+    if (referenceSample)
+      row.append(resultCell(referenceSample, "reference", id));
     return row;
   });
   comparison.querySelector("tbody").replaceChildren(...rows);
+  renderEvidence();
 }
 
 function renderLine() {
@@ -222,6 +341,10 @@ function renderLine() {
 }
 
 function setDrawing(on) {
+  if (on) {
+    selectedEvidence = null;
+    renderEvidence();
+  }
   draft = on ? [] : null;
   aimingPoint = on ? [...line[0]] : null;
   map.dataset.drawing = String(on);
@@ -248,6 +371,7 @@ function setDrawing(on) {
 
 function setLine(points) {
   line = points;
+  selectedEvidence = null;
   presetButtons.forEach((button) =>
     button.setAttribute(
       "aria-pressed",
@@ -264,9 +388,40 @@ function clearShareStatus() {
   shareFallback.hidden = true;
 }
 
-sampleIndex.addEventListener("input", updateSample);
+sampleIndex.addEventListener("input", () => {
+  selectedEvidence = null;
+  updateSample();
+  renderEvidence();
+});
+document.querySelector("#clear-evidence").addEventListener("click", () => {
+  selectedEvidence = null;
+  renderEvidence();
+  mapTitle.focus({ preventScroll: true });
+});
+document.querySelector(".section-links").addEventListener("click", (event) => {
+  const anchor = event.target.closest("a");
+  if (
+    !anchor ||
+    event.ctrlKey ||
+    event.metaKey ||
+    event.shiftKey ||
+    event.altKey
+  )
+    return;
+  const target = document.getElementById(anchor.hash.slice(1));
+  if (!target) return;
+  event.preventDefault();
+  if (target instanceof HTMLDetailsElement) {
+    target.open = true;
+    target.querySelector("summary").focus({ preventScroll: true });
+  } else {
+    target.focus({ preventScroll: true });
+  }
+  target.scrollIntoView({ block: "start" });
+});
 pinButton.addEventListener("click", () => {
   reference = line;
+  selectedEvidence = null;
   clearShareStatus();
   renderComparison();
   setDrawing(false);
@@ -275,16 +430,18 @@ pinButton.addEventListener("click", () => {
 });
 clearButton.addEventListener("click", () => {
   reference = null;
+  selectedEvidence = null;
   clearShareStatus();
   renderComparison();
   setDrawing(false);
   pinButton.focus();
 });
 
-function shareUrl(points, against, base = location.href) {
+function shareUrl(points, against, base = location.href, focus) {
   const url = new URL(base);
   const params = new URLSearchParams({ line: points.flat().join(",") });
   if (against) params.set("reference", against.flat().join(","));
+  if (focus) params.set("evidence", focus.kind + ":" + focus.id);
   url.hash = params.toString();
   return url.href;
 }
@@ -318,7 +475,12 @@ function downloadMarkdown(filename, markdown) {
 const publishedInvestigation =
   "https://sharkerswag.github.io/Landfold/investigate.html";
 document.querySelector("#export-comparison").addEventListener("click", () => {
-  const url = shareUrl(line, reference, publishedInvestigation);
+  const url = shareUrl(
+    line,
+    reference,
+    publishedInvestigation,
+    selectedEvidence,
+  );
   downloadMarkdown(
     "Landfold-全福庄选线对照.md",
     [
@@ -333,7 +495,7 @@ document.querySelector("#export-comparison").addEventListener("click", () => {
 });
 
 document.querySelector("#share-lines").addEventListener("click", async () => {
-  const url = shareUrl(line, reference);
+  const url = shareUrl(line, reference, location.href, selectedEvidence);
   clearShareStatus();
   try {
     await navigator.clipboard.writeText(url);
@@ -403,7 +565,17 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && draft) setDrawing(false);
 });
 new ResizeObserver(drawOverlay).observe(map);
-setLine(line);
+function restoreSharedSelection() {
+  const params = new URLSearchParams(location.hash.slice(1));
+  reference = readTransect(params.get("reference"));
+  setLine(readTransect(params.get("line")) ?? transects.settlement.points);
+  const [kind, id] = (params.get("evidence") ?? "").split(":");
+  showEvidence(kind, id, false);
+}
+restoreSharedSelection();
+window.addEventListener("hashchange", () => {
+  if (!location.hash || location.hash.includes("=")) restoreSharedSelection();
+});
 
 for (const entry of Object.values(evidence)) {
   const article = element("article", undefined, "source-item");
@@ -463,6 +635,28 @@ function addReply(turn) {
     element("h3", turn.question),
     renderAnswer(turn.answer, turn.citations),
   );
+  for (const [kind, points] of [
+    ["current", turn.points],
+    ["reference", turn.reference],
+  ]) {
+    if (!points) continue;
+    const readings = sampleTransect(points);
+    const group = element("div", undefined, "turn-evidence");
+    const label = kind === "current" ? "在图上核对当前线" : "在图上核对对照线";
+    group.append(element("span", label));
+    for (const id of Object.keys(classes)) {
+      if (!readings.counts[id] || id === "?") continue;
+      const text = classes[id].name + " " + readings.counts[id] + " 点";
+      group.append(
+        evidenceButton(text, label + "的" + text, () => {
+          reference = turn.reference;
+          setLine(turn.points);
+          showEvidence(kind, id);
+        }),
+      );
+    }
+    if (group.childElementCount > 1) article.append(group);
+  }
   const sources = element("details");
   sources.append(element("summary", "本轮查证与来源"));
   const list = element("ul");
