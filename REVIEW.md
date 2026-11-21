@@ -7,6 +7,7 @@ Review task: open the investigation and find the map, selection controls, curren
 - The tinted 0.4.0 layout still read like a long-form article. The white layout moves the map and its controls up, puts results beside the map and keeps study photographs in the evidence section.
 - Readability and interaction: **4 / 5**. The hierarchy is clearer on desktop. On mobile, the map and results still require vertical scrolling. The published figure's labels are dense at small sizes.
 - Verified white backgrounds and the select, pin, compare, share and export workflow in Chrome at 320–1440 pixels. The local DeepSeek form and the public evidence browser use the same layout.
+- A live reply misplaced the settlement toward the beginning of the line. The sampling tool now includes exact ranges for every continuous segment, and the Skill asks for A-to-B sample numbers when a question concerns position. A second live browser run correctly identified settlement points 37–44 and reported zero settlement readings after switching to the terrace line. Both replies preserved the elevation limitation.
 
 ## 0.4.0 · 2026-11-21
 

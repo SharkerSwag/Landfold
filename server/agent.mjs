@@ -97,14 +97,21 @@ async function complete(config, messages, toolChoice) {
 function traceLine(points) {
   const { count, counts, sequence } = sampleTransect(points);
   const runs = [];
-  for (const id of sequence) {
+  for (const [index, id] of sequence.entries()) {
     const last = runs.at(-1);
-    if (last?.class === classes[id].name) last.samples++;
-    else runs.push({ class: classes[id].name, samples: 1 });
+    const point = index + 1;
+    if (last?.class === classes[id].name) last.endPoint = point;
+    else
+      runs.push({
+        class: classes[id].name,
+        startPoint: point,
+        endPoint: point,
+      });
   }
   return {
     source: "Liu 等，Water 2022，图 1c",
     pointsInMapImage: points,
+    pointOrder: "从 A 到 B，点号从 1 开始。",
     count,
     counts: Object.fromEntries(
       Object.entries(counts).map(([id, number]) => [classes[id].name, number]),

@@ -136,6 +136,10 @@ test("each turn reads the current line and retains earlier tool results", async 
   assert.equal(second.citations[0].id, "region");
   assert.equal(observed[0].skillLoaded, true);
   assert.ok(observed[0].sample.counts["村寨"] > 0);
+  assert.deepEqual(
+    observed[0].sample.orderedRuns.filter((run) => run.class === "村寨"),
+    [{ class: "村寨", startPoint: 37, endPoint: 44 }],
+  );
   assert.equal(observed[1].sample.counts["村寨"], 0);
   assert.equal(
     observed[1].reference.counts["村寨"],
