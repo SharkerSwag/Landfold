@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { investigate } from "./agent.mjs";
 import { validTransect } from "../docs/investigation-data.js";
 import { validRechargeSelection } from "../docs/recharge-data.js";
+import { validTerrainSelection } from "../docs/terrain-data.js";
 
 const maxBody = 8192;
 const ttl = 60 * 60 * 1000;
@@ -64,13 +65,23 @@ export function agentRoute(config) {
       });
     }
     const mode = data.mode ?? "map";
-    let selection;
-    if (mode === "recharge") {
+    if (!["map", "recharge", "combined", "terrain"].includes(mode)) {
+      return json(response, 400, { error: "探究方式无效。" });
+    }
+    const selection = { mode };
+    if (mode === "terrain") {
+      if (!validTerrainSelection(data.terrain)) {
+        return json(response, 400, { error: "请检查地形采样点。" });
+      }
+      selection.terrain = data.terrain;
+    }
+    if (mode === "recharge" || mode === "combined") {
       if (!validRechargeSelection(data.months)) {
         return json(response, 400, { error: "请选取两个不同的研究月份。" });
       }
-      selection = { mode, months: data.months };
-    } else if (mode === "map") {
+      selection.months = data.months;
+    }
+    if (mode === "map" || mode === "combined") {
       const reference = data.reference ?? null;
       if (
         !validTransect(data.points) ||
@@ -78,9 +89,8 @@ export function agentRoute(config) {
       ) {
         return json(response, 400, { error: "请检查当前选线和对照线。" });
       }
-      selection = { mode, points: data.points, reference };
-    } else {
-      return json(response, 400, { error: "探究方式无效。" });
+      selection.points = data.points;
+      selection.reference = reference;
     }
     const now = Date.now();
     for (const [id, session] of sessions) {

@@ -60,6 +60,12 @@ The cover photograph remains licensed under CC BY-SA 3.0. Any derivative photogr
 - License: **SIL Open Font License 1.1**, included at `docs/assets/fonts/OFL.txt`.
 - New characters outside the subset use the documented system serif fallback. When editorial text changes, refresh the subset with `python scripts/refresh-font.py`.
 
+## Regional elevation profiles
+
+- Data: SRTM version 3, 3 arc-second grid at approximately 90 m, served by [Open Topo Data](https://www.opentopodata.org/datasets/srtm/).
+- The center is the world heritage reference coordinate rounded to five decimals. The project draws two lines offset by 0.02° along latitude or longitude in each direction. Each line uses 45 evenly spaced coordinates including its endpoints, rounded to seven decimals for the API's `srtm90m` dataset. Values fetched November 21, 2026 are stored in `docs/terrain-data.js`.
+- The profiles describe regional relief. The published watershed map has no matching geographic coordinates for these sample locations.
+
 ## Regional geography
 
 - Publisher: **UNESCO World Heritage Centre**

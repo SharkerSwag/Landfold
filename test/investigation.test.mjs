@@ -15,6 +15,7 @@ import {
   rechargeMonths,
   validRechargeSelection,
 } from "../docs/recharge-data.js";
+import { readTerrain, validTerrainSelection } from "../docs/terrain-data.js";
 
 async function start(t, handler) {
   const server = http.createServer(handler).listen(0, "127.0.0.1");
@@ -101,7 +102,16 @@ test("each turn reads its active view and retains earlier tool results", async (
       .filter((message) => message.role === "tool");
     const { mode, referenceLine } = JSON.parse(messages[lastUser].content);
     const isRecharge = mode === "recharge";
-    const names = isRecharge
+    const isCombined = mode === "combined";
+    const isTerrain = mode === "terrain";
+    const names = isCombined
+      ? [
+          "sample_current_transect", "sample_reference_transect",
+          "compare_recharge_months", "lookup_evidence", "lookup_evidence",
+        ]
+      : isTerrain
+        ? ["read_terrain_profile", "lookup_evidence"]
+        : isRecharge
       ? ["compare_recharge_months", "lookup_evidence"]
       : referenceLine
         ? [
@@ -113,6 +123,9 @@ test("each turn reads its active view and retains earlier tool results", async (
     let message;
     if (results.length < names.length) {
       const name = names[results.length];
+      const source = isCombined
+        ? results.length === 3 ? "map" : "recharge"
+        : isRecharge ? "recharge" : isTerrain ? "terrain" : "region";
       message = {
         content: null,
         tool_calls: [
@@ -123,14 +136,14 @@ test("each turn reads its active view and retains earlier tool results", async (
               name,
               arguments:
                 name === "lookup_evidence"
-                  ? JSON.stringify({ id: isRecharge ? "recharge" : "region" })
+                  ? JSON.stringify({ id: source })
                   : "{}",
             },
           },
         ],
       };
     } else if (referenceLine && !messages[0].content.includes("可用 ID")) {
-      message = { content: "接口测试应答 [water]" };
+      message = { content: isCombined ? "接口测试应答 [map]" : "接口测试应答 [water]" };
     } else {
       if (referenceLine)
         correctedCitation = messages[0].content.includes("可用 ID");
@@ -141,12 +154,14 @@ test("each turn reads its active view and retains earlier tool results", async (
           .filter((entry) => entry.role === "tool").length,
         sample: JSON.parse(results[0].content),
         reference: referenceLine ? JSON.parse(results[1].content) : null,
+        rechargeComparison: isCombined ? JSON.parse(results[2].content) : null,
         tools: tools.map((entry) => entry.function.name),
       });
       message = {
-        content: isRecharge
-          ? "接口测试应答 [recharge]"
-          : "接口测试应答 [region]",
+        content: isCombined
+          ? "接口测试应答 [map][recharge]"
+          : isTerrain ? "接口测试应答 [terrain]"
+            : isRecharge ? "接口测试应答 [recharge]" : "接口测试应答 [region]",
       };
     }
     res
@@ -215,4 +230,35 @@ test("each turn reads its active view and retains earlier tool results", async (
     74,
   );
   assert.equal(observed[2].earlierResults, 5);
+  const combined = await ask({
+    mode: "combined",
+    points: transects.settlement.points,
+    reference: transects.terraces.points,
+    months: defaultRechargeSelection,
+  }, first.session);
+  assert.equal(combined.session, first.session);
+  assert.equal(observed[3].earlierResults, 7);
+  assert.equal(observed[3].sample.counts["村寨"], 8);
+  assert.equal(observed[3].reference.counts["村寨"], 0);
+  assert.equal(
+    observed[3].rechargeComparison.secondMinusFirst.groundwaterPercentagePoints, 74,
+  );
+  assert.deepEqual(combined.citations.map((source) => source.id), ["map", "recharge"]);
+  assert.match(combined.answer, /\[map\]\[recharge\]/);
+  const terrain = await ask({ mode: "terrain", terrain: { route: "ns", point: 22 } }, first.session);
+  assert.equal(terrain.session, first.session);
+  assert.equal(observed[4].earlierResults, 12);
+  assert.equal(observed[4].sample.sampleElevationM, 2124);
+  assert.equal(terrain.citations[0].id, "terrain");
+});
+
+test("terrain profiles validate the selection and use route-specific distances and relief", () => {
+  const north = readTerrain({ route: "ns", point: 22 });
+  assert.equal(north.sampleDistanceKm, 2.22);
+  assert.equal(north.reliefM, 415);
+  const east = readTerrain({ route: "ew", point: 29 });
+  assert.equal(east.sampleElevationM, 2179);
+  assert.equal(east.reliefM, 389);
+  assert.equal(validTerrainSelection({ route: "ns", point: 45 }), false);
+  assert.equal(validTerrainSelection({ route: "toString", point: 0 }), false);
 });

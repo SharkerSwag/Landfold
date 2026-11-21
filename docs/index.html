@@ -3,16 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#dce6e6" />
+    <meta name="theme-color" content="#ffffff" />
     <meta
       name="description"
-      content="Landfold 地景志，以真实摄影、可点击的地景观察与有来源的解释，探索土地、水与人的联系。"
+      content="Landfold 地景志是一个地理查证 Agent。从云南元阳出发，读地图、比水源，沿着研究证据回答地理问题。"
     />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Landfold · 地景志" />
     <meta
       property="og:description"
-      content="山水之间，生活有迹。循着地景的纹理，读懂一片土地。"
+      content="用地图和实地研究查证地理问题。进入云南元阳，沿线找村寨、按月比水源。"
     />
     <meta property="og:url" content="https://sharkerswag.github.io/Landfold/" />
     <meta
@@ -21,8 +21,9 @@
     />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
-    <link rel="stylesheet" href="styles.css?v=0.4.1" />
+    <link rel="stylesheet" href="styles.css?v=0.6.0" />
     <link rel="stylesheet" href="journal.css?v=0.4.1" />
+    <link rel="stylesheet" href="home.css?v=0.6.0" />
     <link
       rel="preload"
       as="font"
@@ -30,13 +31,9 @@
       type="font/ttf"
       crossorigin
     />
-    <link
-      rel="preload"
-      as="image"
-      href="assets/yuanyang-terraces-charrine-liu.jpg"
-    />
     <script type="module" src="app.js"></script>
-    <title>Landfold · 地景志</title>
+    <script type="module" src="home.js?v=0.6.0"></script>
+    <title>Landfold · 地景志 | 地理查证 Agent</title>
   </head>
   <body>
     <a href="#main" class="skip-link">跳到地景内容</a>
@@ -49,12 +46,12 @@
         </svg>
         <span
           ><span class="brand-name" lang="en">Landfold</span
-          ><span class="brand-sub">地景志 / A LANDSCAPE JOURNAL</span></span
+          ><span class="brand-sub">地景志</span></span
         >
       </a>
       <nav class="header-nav" aria-label="主导航">
-        <a class="active" href="#journal">本期图志</a>
-        <a class="nav-relations" href="#connections">地景关系</a>
+        <a class="active" href="investigate.html?case=map">地理探究</a>
+        <a href="#cover">本期图志</a>
         <button type="button" data-action="notes">
           观察札记<sup id="note-count">0</sup>
         </button>
@@ -62,20 +59,55 @@
           关于 Landfold
         </button>
       </nav>
-      <div class="header-right">
-        <span class="edition">中国 · 云南<br />山地与人居 / 001</span
-        ><button
-          type="button"
-          class="round-button"
-          data-action="read"
-          aria-label="阅读当前地景解读"
-        >
-          读
-        </button>
-      </div>
     </header>
 
     <main id="main">
+      <section class="research-home" aria-labelledby="home-title">
+        <div class="research-intro">
+          <h1 id="home-title">地理查证 Agent</h1>
+          <p class="research-description">
+            向 Landfold 提一个地理问题。查地图上的地类、比不同月份的水源，
+            每条判断都能回到图表和研究原文核对。
+          </p>
+          <nav class="research-questions" aria-label="从一个地理问题开始">
+            <a href="investigate.html?case=map">
+              <span><small>地图选线</small>哪条线经过了村寨？</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+            <a href="investigate.html?case=water">
+              <span><small>水源对照</small>两个月的地下水补给占比差多少？</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+            <a href="investigate.html?case=combined">
+              <span><small>综合查证</small>地图和水源数据能解释村寨的选址吗？</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+          </nav>
+          <form class="research-question-form" action="investigate.html" id="home-question" hidden>
+            <label for="home-question-text">问一个自己的问题</label>
+            <div>
+              <input id="home-question-text" placeholder="例如：两条选线采到什么地类？" maxlength="1200" required />
+              <button type="submit">去查证</button>
+            </div>
+          </form>
+          <p id="home-availability" class="research-availability">在线可操作图表并回看 Agent 查证。实时对话在本地可用。</p>
+          <a class="research-terrain" href="investigate.html#view=terrain">读元阳地形剖面 ↗</a>
+        </div>
+        <figure class="research-photo">
+          <img
+            src="assets/hani-terraces-xiquinhosilva.jpg"
+            alt="云南元阳的哈尼梯田沿坡展开"
+            width="2560"
+            height="1709"
+            fetchpriority="high"
+          />
+          <figcaption>
+            <a class="research-issue" href="#cover">云南元阳 · 哈尼梯田图志 <span aria-hidden="true">↓</span></a>
+            <a href="https://commons.wikimedia.org/wiki/File:Hani_Rice_Terraces_(53696483750).jpg">摄影 · Xiquinho Silva</a>
+            <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a>
+          </figcaption>
+        </figure>
+      </section>
       <section id="cover" class="landscape" aria-label="元阳梯田地景图志封面">
         <div class="scene" id="scene">
           <img
@@ -84,7 +116,7 @@
             src="assets/yuanyang-terraces-charrine-liu.jpg"
             width="2048"
             height="1365"
-            fetchpriority="high"
+            loading="lazy"
             alt="云南元阳的真实摄影：层层蓄水的梯田映着天空，远处山峦在雾气中逐层淡去。"
           />
           <span class="scene-hint">真实摄影 / 点击编号，开始观察</span>
@@ -152,7 +184,7 @@
 
         <div class="cover-title">
           <p class="eyebrow">LANDSCAPE JOURNAL / 云南 · 元阳</p>
-          <h1>山水之间<br /><span>生活有迹</span></h1>
+          <h2>山水之间<br /><span>生活有迹</span></h2>
           <p class="title-small">循着地景的纹理，读懂一片土地。</p>
         </div>
         <p class="side-writing">山地与人居　第一篇</p>

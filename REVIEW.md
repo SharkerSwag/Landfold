@@ -1,5 +1,14 @@
 # Landfold iteration reviews
 
+## 0.6.0 · 2026-11-21
+
+Review task: start on the public homepage from a phone, choose a geography question, find the cited evidence, then run the same question and a terrain follow-up with the local Agent.
+
+- The home cover put the only investigation link in the article. The white opening now identifies Landfold as a geography investigation Agent, offers three questions that open with evidence selected, and links directly to the elevation profile. All three questions appear in the initial screen at 320–1920 px. The photographic journal still supports its photo annotations, diagram, folios and notebook.
+- The combined question reads the current and comparison lines and the recharge table in one turn. Initial model runs misstated the complementary point range or the exact water shares. The server now formats tool readings directly and the Skill asks the model to interpret the results. Recorded tool output confirms 8 of 55 versus 0 of 45 village samples and a 4% to 78% change.
+- Both SRTM profiles were checked against the data service. The default north-to-south profile reads 2124 m at 2.22 km and 415 m of total relief. Tests cover sharing a selected point, restoring each selection from its reply, and an export containing map, water and elevation links.
+- **First-time orientation: 4.5 / 5. Evidence use across views: 4 / 5.** The public page can replay a recorded DeepSeek trace with its evidence. Free-form conversation uses the local service. The regional SRTM lines lack matching map coordinates, so a follow-up about the altitude of a mapped village still requires aligned data.
+
 ## 0.5.0 · 2026-11-21
 
 Review task: check a village's sample range, switch to a monthly water-source comparison in the same conversation, change the months, and reopen both kinds of evidence.

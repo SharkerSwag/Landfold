@@ -1,16 +1,18 @@
 # Landfold · 地景志
 
-**An interactive geography journal exploring the connections between land, water, and people through photography and visual storytelling.**
+**A geography investigation Agent with interactive evidence and a photographic field journal.**
 
 山水之间，生活有迹。循着地景的纹理，读懂一片土地。
 
-[Visit Landfold](https://sharkerswag.github.io/Landfold/) · [Photography & sources](THIRD_PARTY_NOTICES.md) · [Design direction](DESIGN.md)
+[Visit Landfold](https://sharkerswag.github.io/Landfold/) · [实验报告](实验报告.md) · [Photography & sources](THIRD_PARTY_NOTICES.md)
 
 ![Landfold photographic cover](docs/assets/share-preview.png)
 
 Landfold 通过真实风景摄影、可点击的观察点与有来源的解释，呈现地理景观与人地关系。第一期从云南元阳的梯田开始：田埂的纹理、水面的光、林与田的边界，以及人留在山地中的痕迹。
 
 ## Current experience
+
+Choose a question on the homepage to open the investigation with its evidence selected. The local Agent also accepts a custom question entered on the homepage.
 
 - Open an immersive photographic cover, then turn through a four-chapter editorial issue.
 - Explore an original, interactive forest–village–terraces–river schematic with sourced explanations.
@@ -36,11 +38,13 @@ npm run dev
 
 Open **http://127.0.0.1:4180/Landfold/**. The local server uses the same project path as GitHub Pages so relative assets and module imports can be checked before publication.
 
-Open **http://127.0.0.1:4180/Landfold/investigate.html** to ask about the current line or month pair. The server loads [the investigation Skill](skills/check-transect/SKILL.md), sends the tool schemas for the current view, executes the requested calculations and source lookups, and sends the results back to the model. Conversation memory retains up to eight completed turns in a server session across both views. Refreshing the page starts a new conversation. Export saves the visible conversation with both kinds of selection and their sources as Markdown.
+Open **http://127.0.0.1:4180/Landfold/investigate.html** to ask about the evidence under review. The server loads [the investigation Skill](skills/check-transect/SKILL.md), sends the tool schemas for the request scope, executes calculations and source lookups, and sends the results back to the model. Conversation memory retains up to eight completed turns in a server session across views. Refreshing the page starts a new conversation.
 
 For a review run, start with “穿过村寨”, pin it as the reference, and switch to “沿梯田带”. Ask which line sampled a settlement and whether the map establishes elevation. The reference has 8 settlement readings out of 55 points, and the current line has 0 out of 45. Use the links in the answer to check the cited material. Run `npm test` for the sampling and tool-loop regression checks. See the [iteration review](REVIEW.md) for tested behavior and remaining gaps.
 
-The static Pages site supports map sampling, water-source comparisons and sources. Model calls run from the local server. The evidence map is a published land-use figure, so the line uses normalized image coordinates. Counts describe pixels sampled along the selected line. Verifying altitude or channel direction would require geographically aligned data.
+The [combined investigation](https://sharkerswag.github.io/Landfold/investigate.html?case=combined) pairs map samples with recharge evidence. In a live Agent turn, both data tools run and both sources must be cited. Try it, then switch to the [regional terrain profile](https://sharkerswag.github.io/Landfold/investigate.html#view=terrain&route=ns&point=22) and ask the Agent whether the selected point can be identified as a village from the map. Both turns share the same conversation. Export includes each type of selection and its sources.
+
+The static Pages site supports map sampling, water-source comparisons, terrain profiles and sources. Model calls run from the local server. The map uses normalized image coordinates, and the two SRTM profiles use geographic coordinates. Comparing land use with elevation along the same line requires aligned data.
 
 ## GitHub Pages
 

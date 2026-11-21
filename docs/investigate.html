@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#ffffff" />
     <title>全福庄小流域探究 · Landfold 地景志</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="investigate.css?v=0.5.0" />
-    <script type="module" src="investigate.js?v=0.5.0"></script>
+    <link rel="stylesheet" href="investigate.css?v=0.6.0" />
+    <script type="module" src="investigate.js?v=0.6.0"></script>
   </head>
   <body>
     <header class="masthead">
@@ -22,15 +22,30 @@
     <main>
       <div class="page-title">
         <p>云南元阳</p>
-        <h1>全福庄小流域</h1>
-        <p>沿线读地类，按月比较梯田的水源补给。</p>
+        <h1 id="workspace-title">全福庄小流域</h1>
+        <p id="workspace-description">沿线读地类，按月比较梯田的水源补给。</p>
       </div>
+      <section class="case-start" id="case-start" aria-labelledby="case-question" hidden>
+        <div>
+          <h2 id="case-question"></h2>
+          <p id="case-method"></p>
+        </div>
+        <div class="case-actions">
+          <button type="button" data-case-evidence="map">看地图证据</button>
+          <button type="button" data-case-evidence="recharge">看水源数据</button>
+          <button type="button" class="primary" id="ask-case" hidden>问 Agent</button>
+          <button type="button" id="show-example" hidden>看一次真实查证</button>
+        </div>
+      </section>
       <div class="view-switch" role="group" aria-label="探究方式">
         <button type="button" data-view="map" aria-pressed="true">
           地图选线
         </button>
         <button type="button" data-view="recharge" aria-pressed="false">
           水源对照
+        </button>
+        <button type="button" data-view="terrain" aria-pressed="false">
+          地形剖面
         </button>
       </div>
       <nav class="section-links" aria-label="探究页面区块">
@@ -40,6 +55,7 @@
         <a href="#recharge-results-title" data-for-view="recharge" hidden
           >对照</a
         >
+        <a href="#terrain-title" data-for-view="terrain" hidden>剖面</a>
         <a href="#inquiry-title">查证</a>
         <a href="#research-sources">资料</a>
       </nav>
@@ -167,6 +183,46 @@
             月。研究通过稳定同位素与二元混合模型估算比例。
           </p>
         </section>
+        <section class="panel terrain" aria-labelledby="terrain-title" data-for-view="terrain" hidden>
+          <div class="section-head">
+            <h2 id="terrain-title" tabindex="-1">元阳区域地形剖面</h2>
+            <a href="https://www.opentopodata.org/datasets/srtm/" target="_blank" rel="noopener">高程来源 ↗</a>
+          </div>
+          <div class="month-fields">
+            <label for="terrain-route">采样方向 <select id="terrain-route"></select></label>
+          </div>
+          <p id="terrain-summary"></p>
+          <svg id="terrain-chart" viewBox="0 0 665 215" role="img" aria-label="海拔随沿线距离变化的剖面图">
+            <g class="terrain-grid">
+              <line x1="60" x2="620" y1="30" y2="30" />
+              <line x1="60" x2="620" y1="78" y2="78" />
+              <line x1="60" x2="620" y1="126" y2="126" />
+              <line x1="60" x2="620" y1="174" y2="174" />
+            </g>
+            <g class="terrain-ticks">
+              <text x="5" y="21">海拔（米）</text>
+              <text x="8" y="36">2200</text>
+              <text x="8" y="84">2000</text>
+              <text x="8" y="132">1800</text>
+              <text x="8" y="180">1600</text>
+              <text x="60" y="202">起点</text>
+              <text id="terrain-end-distance" x="620" y="202" text-anchor="end"></text>
+            </g>
+            <polygon class="terrain-fill" />
+            <path class="terrain-profile-line" />
+            <line id="terrain-guide" y2="174" />
+            <circle r="5" />
+          </svg>
+          <label class="sample-control" for="terrain-point">
+            <span>沿线取点 <output id="terrain-readout" for="terrain-point"></output></span>
+            <input id="terrain-point" type="range" min="0" step="1" />
+          </label>
+          <p class="caption">每线 45 点，SRTM 网格约 90 米。剖面与全福庄土地利用图未配准，读数适用于区域地势。</p>
+          <div class="terrain-links">
+            <a id="terrain-selection">本点链接</a>
+            <a href="https://whc.unesco.org/en/list/1111/" target="_blank" rel="noopener">布线参考坐标 ↗</a>
+          </div>
+        </section>
         <div class="sidebar">
           <section
             class="panel"
@@ -238,6 +294,11 @@
             <div id="availability" class="availability" role="status">
               正在检查 Agent 连接…
             </div>
+            <section id="example-record" aria-labelledby="example-title" hidden>
+              <h3 id="example-title" tabindex="-1">DeepSeek 查证记录</h3>
+              <p class="caption">记录对应此题的初始选线与月份。可点开当时的证据复查。</p>
+              <div id="example-output" aria-live="polite"></div>
+            </section>
             <div
               id="conversation"
               aria-label="对话记录"
@@ -258,6 +319,10 @@
                 maxlength="1200"
                 required
               ></textarea>
+              <label class="include-both">
+                <input type="checkbox" id="include-both" />
+                同时查证当前地图选线和月份对照
+              </label>
               <div class="question-actions">
                 <button class="primary" type="submit">查证</button>
                 <button id="export-inquiry" type="button" hidden>

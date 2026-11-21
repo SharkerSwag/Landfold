@@ -8,13 +8,15 @@ import {
   transectLabel,
   transects,
   validTransect,
-} from "./investigation-data.js?v=0.5.0";
+} from "./investigation-data.js?v=0.6.0";
 import {
   createRechargeView,
   rechargeUrl,
   recordRecharge,
 } from "./recharge-view.js?v=0.5.0";
 import { monthLabel } from "./recharge-data.js";
+import { readTerrain } from "./terrain-data.js";
+import { createTerrainView, terrainUrl } from "./terrain-view.js";
 
 const map = document.querySelector("#study-map");
 const mapImage = map.querySelector("img");
@@ -34,6 +36,7 @@ const drawButton = document.querySelector("#draw-line");
 const mapStatus = document.querySelector("#map-status");
 const form = document.querySelector("#question-form");
 const questionInput = document.querySelector("#question");
+const combinedInput = document.querySelector("#include-both");
 const questionStatus = document.querySelector("#question-status");
 const conversation = document.querySelector("#conversation");
 const exportButton = document.querySelector("#export-inquiry");
@@ -60,25 +63,71 @@ let session;
 let mode = "map";
 const turns = [];
 const rechargeView = createRechargeView();
+const terrainView = createTerrainView();
 const viewButtons = [...document.querySelectorAll("[data-view]")];
+const search = new URLSearchParams(location.search);
+const caseId = search.get("case");
+const cases = {
+  map: {
+    question: "哪条线经过了村寨？",
+    method: "对照两条选线，再在图上定位采到村寨的点。",
+  },
+  water: {
+    question: "两个月的地下水补给占比差多少？",
+    method: "在月度图表中读出 A 和 B 的地下水占比，计算相差的百分点。",
+  },
+  combined: {
+    question: "地图和水源数据能解释村寨的选址吗？",
+    method: "找出村寨采样点，比较月度地下水补给占比，再核对两份资料各自的范围。",
+  },
+};
+const starter = Object.hasOwn(cases, caseId) ? cases[caseId] : null;
+
+function jumpTo(target) {
+  target.focus({ preventScroll: true });
+  target.scrollIntoView({ block: "start" });
+}
+
+function describeQuestion() {
+  if (mode === "terrain") {
+    document.querySelector(".lead").textContent =
+      "这个点海拔多少？从整条剖面能读出怎样的地势起伏？";
+    document.querySelector("#question-label").textContent = "关于当前剖面的问题";
+    return;
+  }
+  document.querySelector(".lead").textContent = combinedInput.checked
+    ? cases.combined.question
+    : mode === "map"
+      ? "这条线经过村寨和梯田吗？能据此判断它们谁高谁低吗？"
+      : "两个月的补给构成有什么不同？占比上升能说明水量增加吗？";
+  document.querySelector("#question-label").textContent = combinedInput.checked
+    ? "关于选线和月份的问题"
+    : mode === "map"
+      ? "关于当前选线的问题"
+      : "关于当前两个月份的问题";
+}
 
 function setMode(view) {
   mode = view;
-  if (view === "recharge" && draft) setDrawing(false);
+  const isTerrain = view === "terrain";
+  if (view !== "map" && draft) setDrawing(false);
+  document.querySelector("#workspace-title").textContent = isTerrain
+    ? "红河哈尼梯田区域地形"
+    : "全福庄小流域";
+  document.querySelector("#workspace-description").textContent = isTerrain
+    ? "沿南北和东西剖面观察海拔随距离的变化。"
+    : "沿线读地类，按月比较梯田的水源补给。";
+  combinedInput.closest("label").hidden = isTerrain;
   for (const button of viewButtons) {
     button.setAttribute("aria-pressed", String(button.dataset.view === view));
   }
   document.querySelectorAll("[data-for-view]").forEach((section) => {
     section.hidden = section.dataset.forView !== view;
   });
-  document.querySelector(".lead").textContent =
-    view === "map"
-      ? "这条线经过村寨和梯田吗？能据此判断它们谁高谁低吗？"
-      : "两个月的补给构成有什么不同？占比上升能说明水量增加吗？";
-  document.querySelector("#question-label").textContent =
-    view === "map" ? "关于当前选线的问题" : "关于当前两个月份的问题";
+  describeQuestion();
 }
 
+combinedInput.addEventListener("change", describeQuestion);
 viewButtons.forEach((button) =>
   button.addEventListener("click", () => setMode(button.dataset.view)),
 );
@@ -626,6 +675,27 @@ document.addEventListener("keydown", (event) => {
 new ResizeObserver(drawOverlay).observe(map);
 function restoreSharedSelection() {
   const params = new URLSearchParams(location.hash.slice(1));
+  if (!location.hash && starter) {
+    if (caseId === "water") {
+      if (!currentSample) setLine(line);
+      setMode("recharge");
+      return;
+    }
+    setMode("map");
+    reference = transects.terraces.points;
+    setLine(transects.settlement.points);
+    showEvidence("current", "v", false);
+    return;
+  }
+  if (params.get("view") === "terrain") {
+    if (!currentSample) setLine(line);
+    terrainView.render({
+      route: params.get("route"),
+      point: params.has("point") ? Number(params.get("point")) : NaN,
+    });
+    setMode("terrain");
+    return;
+  }
   if (params.get("view") === "recharge") {
     if (!currentSample) setLine(line);
     rechargeView.render((params.get("months") ?? "").split(","));
@@ -639,6 +709,35 @@ function restoreSharedSelection() {
   showEvidence(kind, id, false);
 }
 restoreSharedSelection();
+if (starter) {
+  const panel = document.querySelector("#case-start");
+  panel.hidden = false;
+  panel.querySelector("#case-question").textContent = starter.question;
+  panel.querySelector("#case-method").textContent = starter.method;
+  combinedInput.checked = caseId === "combined";
+  describeQuestion();
+  questionInput.value = starter.question;
+  for (const button of panel.querySelectorAll("[data-case-evidence]")) {
+    const view = button.dataset.caseEvidence;
+    button.hidden = caseId !== "combined" && view !== (caseId === "water" ? "recharge" : "map");
+    button.addEventListener("click", () => {
+      setMode(view);
+      jumpTo(
+        view === "map" ? mapTitle : document.querySelector("#recharge-title"),
+      );
+    });
+  }
+  document.querySelector("#ask-case").addEventListener("click", () => {
+    if (!questionInput.readOnly) {
+      combinedInput.checked = caseId === "combined";
+      if (!combinedInput.checked || mode === "terrain")
+        setMode(caseId === "water" ? "recharge" : "map");
+      describeQuestion();
+      questionInput.value = starter.question;
+    }
+    jumpTo(questionInput);
+  });
+}
 window.addEventListener("hashchange", () => {
   if (!location.hash || location.hash.includes("=")) restoreSharedSelection();
 });
@@ -662,6 +761,17 @@ async function checkAvailability() {
       if (response.ok && (await response.json()).available) {
         status.hidden = true;
         form.hidden = false;
+        if (starter) document.querySelector("#ask-case").hidden = false;
+        if (search.get("ask") === "1") {
+          try {
+            const draftQuestion = sessionStorage.getItem("landfold-question-draft");
+            sessionStorage.removeItem("landfold-question-draft");
+            if (draftQuestion) questionInput.value = draftQuestion.slice(0, 1200);
+          } catch {
+            // The question form remains usable with browser storage disabled.
+          }
+          jumpTo(questionInput);
+        }
         return;
       }
     }
@@ -675,7 +785,30 @@ async function checkAvailability() {
       "https://github.com/SharkerSwag/Landfold#local-development",
     ),
   );
+  if (caseId === "combined") document.querySelector("#show-example").hidden = false;
 }
+
+document.querySelector("#show-example").addEventListener("click", async (event) => {
+  const button = event.currentTarget;
+  const record = document.querySelector("#example-record");
+  const output = document.querySelector("#example-output");
+  record.hidden = false;
+  jumpTo(document.querySelector("#example-title"));
+  if (output.querySelector("article")) return;
+  button.disabled = true;
+  output.textContent = "正在加载查证记录…";
+  try {
+    const response = await fetch("combined-example.json");
+    if (!response.ok) throw new Error("查证记录无法读取。");
+    const example = await response.json();
+    output.replaceChildren();
+    addReply(example, output);
+  } catch {
+    output.textContent = "查证记录加载失败，请重试。";
+  } finally {
+    button.disabled = false;
+  }
+});
 
 document.querySelector("#example-question").addEventListener("click", () => {
   if (questionInput.readOnly) return;
@@ -683,31 +816,53 @@ document.querySelector("#example-question").addEventListener("click", () => {
   questionInput.focus();
 });
 
-function addReply(turn) {
+function addReply(turn, target = conversation) {
   const article = element("article", undefined, "turn");
-  const revisit = element(
-    "button",
-    turn.mode === "recharge"
-      ? "查看本轮月份 · " + turn.months.map(monthLabel).join(" / ")
-      : "查看本轮选线 · " + transectLabel(turn.points),
-    "turn-line",
-  );
-  revisit.type = "button";
-  revisit.addEventListener("click", () => {
-    setMode(turn.mode);
-    if (turn.mode === "recharge") {
+  if (turn.points) {
+    const revisitMap = element(
+      "button",
+      "查看本轮选线 · " + transectLabel(turn.points),
+      "turn-line",
+    );
+    revisitMap.type = "button";
+    revisitMap.addEventListener("click", () => {
+      setMode("map");
+      reference = turn.reference;
+      setLine(turn.points);
+      jumpTo(mapTitle);
+    });
+    article.append(revisitMap);
+  }
+  if (turn.months) {
+    const revisitMonths = element(
+      "button",
+      "查看本轮月份 · " + turn.months.map(monthLabel).join(" / "),
+      "turn-line",
+    );
+    revisitMonths.type = "button";
+    revisitMonths.addEventListener("click", () => {
+      setMode("recharge");
       rechargeView.render(turn.months);
-      const title = document.querySelector("#recharge-title");
-      title.focus({ preventScroll: true });
-      title.scrollIntoView({ block: "start" });
-      return;
-    }
-    reference = turn.reference;
-    setLine(turn.points);
-    map.scrollIntoView({ block: "nearest" });
-  });
+      jumpTo(document.querySelector("#recharge-title"));
+    });
+    article.append(revisitMonths);
+  }
+  if (turn.terrain) {
+    const reading = readTerrain(turn.terrain);
+    const revisitTerrain = element(
+      "button",
+      "查看本轮剖面 · 第 " + reading.pointNumber + " 点",
+      "turn-line",
+    );
+    revisitTerrain.type = "button";
+    revisitTerrain.addEventListener("click", () => {
+      setMode("terrain");
+      terrainView.render(turn.terrain);
+      jumpTo(document.querySelector("#terrain-title"));
+    });
+    article.append(revisitTerrain);
+  }
   article.append(
-    revisit,
     element("h3", turn.question),
     renderAnswer(turn.answer, turn.citations),
   );
@@ -747,7 +902,7 @@ function addReply(turn) {
   }
   sources.append(list);
   article.append(sources);
-  conversation.append(article);
+  target.append(article);
 }
 
 function renderAnswer(answer, citations) {
@@ -780,18 +935,24 @@ form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const question = questionInput.value.trim();
   if (!question || questionInput.readOnly) return;
-  if (mode === "map" && draft) {
+  const scope = mode !== "terrain" && combinedInput.checked ? "combined" : mode;
+  const useMap = scope === "map" || scope === "combined";
+  const useRecharge = scope === "recharge" || scope === "combined";
+  if (useMap && draft) {
     questionStatus.textContent = "请完成选线后再提问。";
     return;
   }
-  const selection =
-    mode === "map"
-      ? { mode, points: line, reference }
-      : { mode, months: rechargeView.selection() };
-  const selectionName =
-    mode === "map"
-      ? transectLabel(line)
-      : selection.months.map(monthLabel).join(" / ");
+  const selection = {
+    mode: scope,
+    ...(useMap ? { points: line, reference } : {}),
+    ...(useRecharge ? { months: rechargeView.selection() } : {}),
+    ...(scope === "terrain" ? { terrain: terrainView.selection() } : {}),
+  };
+  const selectionName = [
+    selection.points && transectLabel(selection.points),
+    selection.months && selection.months.map(monthLabel).join(" / "),
+    selection.terrain && readTerrain(selection.terrain).label,
+  ].filter(Boolean).join("、");
   const submit = form.querySelector('[type="submit"]');
   submit.disabled = true;
   questionInput.readOnly = true;
@@ -832,33 +993,44 @@ form.addEventListener("submit", async (event) => {
 
 exportButton.addEventListener("click", () => {
   const markdown = [
-    "# 全福庄小流域 · Landfold 探究札记",
+    "# 元阳 · Landfold 探究札记",
     ...turns.map((turn) => {
       const sources = turn.citations
         .map((source) => "- [" + source.source + "](" + source.url + ")")
         .join("\n");
+      const profile = turn.terrain && readTerrain(turn.terrain);
       return [
         "## " + turn.question,
-        ...(turn.mode === "recharge"
+        ...(turn.months
           ? [
               recordRecharge(turn.months),
               "[复查本轮月份](" +
                 rechargeUrl(publishedInvestigation, turn.months) +
                 ")",
             ]
-          : [
+          : []),
+        ...(turn.points
+          ? [
               recordLine(turn.points, "当前线"),
               ...(turn.reference ? [recordLine(turn.reference, "对照线")] : []),
               "[复查本轮选线与对照](" +
                 shareUrl(turn.points, turn.reference, publishedInvestigation) +
                 ")",
-            ]),
+            ]
+          : []),
+        ...(profile
+          ? [
+              profile.label + " · 第 " + profile.pointNumber + " 点 · 海拔 " +
+                profile.sampleElevationM + " 米 · 全线最大高差 " + profile.reliefM + " 米。",
+              "[复查本轮剖面](" + terrainUrl(publishedInvestigation, turn.terrain) + ")",
+            ]
+          : []),
         turn.answer,
         sources,
       ].join("\n\n");
     }),
   ].join("\n\n");
-  downloadMarkdown("Landfold-全福庄探究札记.md", markdown);
+  downloadMarkdown("Landfold-元阳探究札记.md", markdown);
 });
 
 checkAvailability();

@@ -207,7 +207,7 @@ a:focus-visible {
   letter-spacing: 0.28em;
   margin: 0 0 28px;
 }
-.cover-title h1 {
+.cover-title h2 {
   font-family: var(--serif);
   font-size: clamp(64px, 7.1vw, 114px);
   font-weight: 400;
@@ -215,7 +215,7 @@ a:focus-visible {
   line-height: 1.25;
   margin: 0;
 }
-.cover-title h1 span {
+.cover-title h2 span {
   color: #ffffff;
   text-shadow: 0 1px 12px #19393c25;
 }
@@ -656,7 +656,7 @@ dialog::backdrop {
   .observation-panel {
     width: 300px;
   }
-  .cover-title h1 {
+  .cover-title h2 {
     font-size: 80px;
   }
 }
@@ -716,11 +716,11 @@ dialog::backdrop {
     letter-spacing: 0.23em;
     margin-bottom: 24px;
   }
-  .cover-title h1 {
+  .cover-title h2 {
     font-size: 65px;
     letter-spacing: 0.12em;
   }
-  .cover-title h1 span {
+  .cover-title h2 span {
     color: #213e44;
     text-shadow: none;
   }
@@ -829,7 +829,7 @@ dialog::backdrop {
   .brand-sub {
     font-size: 5.5px;
   }
-  .cover-title h1 {
+  .cover-title h2 {
     font-size: 58px;
   }
   .cover-title .eyebrow {

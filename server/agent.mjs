@@ -3,12 +3,14 @@ import {
   classes,
   evidence,
   sampleTransect,
+  transectLabel,
 } from "../docs/investigation-data.js";
 import {
   compareRecharge,
   monthLabel,
   rechargeSource,
 } from "../docs/recharge-data.js";
+import { readTerrain } from "../docs/terrain-data.js";
 
 const skill = readFileSync(
   new URL("../skills/check-transect/SKILL.md", import.meta.url),
@@ -47,6 +49,10 @@ const tools = [
       id: { type: "string", enum: Object.keys(evidence) },
     },
     ["id"],
+  ),
+  tool(
+    "read_terrain_profile",
+    "Read SRTM elevation at the selected point and the regional profile's overall relief. These coordinates do not align with the published land-use map.",
   ),
 ];
 
@@ -107,6 +113,7 @@ function traceLine(points) {
   const { count, counts, runs } = sampleTransect(points);
   return {
     source: "Liu 等，Water 2022，图 1c",
+    lineLabel: transectLabel(points),
     pointsInMapImage: points,
     pointOrder: "从 A 到 B，点号从 1 开始。",
     count,
@@ -122,6 +129,34 @@ function traceLine(points) {
   };
 }
 
+function formatCurrentReadings(mode, readings) {
+  if (mode === "terrain") {
+    const profile = readings.get("read_terrain_profile");
+    return "**剖面读数。** " + profile.label + "，第 " + profile.pointNumber +
+      " 点，距起点 " + profile.sampleDistanceKm + " 公里，海拔 " +
+      profile.sampleElevationM + " 米。全线 " + profile.distanceKm +
+      " 公里，最低 " + profile.minElevationM + " 米，最高 " +
+      profile.maxElevationM + " 米，最大高差 " + profile.reliefM + " 米 [terrain]。";
+  }
+  if (mode !== "combined") return "";
+  const lines = [
+    ["当前线", readings.get("sample_current_transect")],
+    ["对照线", readings.get("sample_reference_transect")],
+  ]
+    .filter(([, reading]) => reading)
+    .map(([kind, { lineLabel, counts, count }]) =>
+      kind + "「" + lineLabel + "」共 " + count + " 点（" +
+      Object.entries(counts).map(([label, total]) => label + " " + total).join("、") + "）",
+    );
+  const { first, second, secondMinusFirst } = readings.get("compare_recharge_months");
+  const groundwater = secondMinusFirst.groundwaterPercentagePoints;
+  const difference = groundwater > 0 ? "+" + groundwater : String(groundwater);
+  return "**地图读数。** " + lines.join("，") + " [map]。\n\n" +
+    "**水源读数。** 地下水补给占比由 " + monthLabel(first.month) + "的 " +
+    first.groundwater + "% 到 " + monthLabel(second.month) + "的 " +
+    second.groundwater + "%，B 减 A 为 " + difference + " 个百分点 [recharge]。";
+}
+
 export async function investigate({
   config,
   history,
@@ -130,18 +165,25 @@ export async function investigate({
   points,
   reference = null,
   months,
+  terrain,
 }) {
-  const recharge = mode === "recharge";
-  const currentTool = recharge
-    ? "compare_recharge_months"
-    : "sample_current_transect";
+  const useMap = mode === "map" || mode === "combined";
+  const useRecharge = mode === "recharge" || mode === "combined";
+  const useTerrain = mode === "terrain";
+  const requiredTools = new Set();
+  if (useMap) requiredTools.add("sample_current_transect");
+  if (useMap && reference) requiredTools.add("sample_reference_transect");
+  if (useRecharge) requiredTools.add("compare_recharge_months");
+  if (useTerrain) requiredTools.add("read_terrain_profile");
+  const requiredSources = [
+    ...(mode === "combined" ? ["map"] : []),
+    ...(useRecharge ? ["recharge"] : []),
+    ...(useTerrain ? ["terrain"] : []),
+  ];
   const activeTools = tools.filter(
     ({ function: specification }) =>
       specification.name === "lookup_evidence" ||
-      specification.name === currentTool ||
-      (!recharge &&
-        reference &&
-        specification.name === "sample_reference_transect"),
+      requiredTools.has(specification.name),
   );
   const turn = [
     {
@@ -149,28 +191,37 @@ export async function investigate({
       content: JSON.stringify({
         mode,
         question,
-        ...(recharge
-          ? { selectedMonths: months }
-          : { currentLine: points, referenceLine: reference }),
+        ...(useMap ? { currentLine: points, referenceLine: reference } : {}),
+        ...(useRecharge ? { selectedMonths: months } : {}),
       }),
     },
   ];
   const trace = [];
   const citations = new Map();
-  let sampled = false;
-  let sampledReference = false;
+  const readings = new Map();
   let correction = "";
   let toolChoice = "auto";
-  const requiredCitation = () =>
-    recharge ? citations.has("recharge") : citations.size > 0;
-  for (let round = 0; round < 6; round++) {
+  const roundLimit = mode === "combined" ? 8 : 6;
+  const nextCheck = () => {
+    const missingTool = [...requiredTools].find((name) => !readings.has(name));
+    if (missingTool) return { name: missingTool, detail: "" };
+    const missingSource = requiredSources.find((id) => !citations.has(id));
+    if (missingSource || !citations.size) {
+      return {
+        name: "lookup_evidence",
+        detail: missingSource ? "，id 使用 " + missingSource : "",
+      };
+    }
+    return null;
+  };
+  for (let round = 0; round < roundLimit; round++) {
     const message = await complete(
       config,
       [
         {
           role: "system",
           content:
-            "你是 Landfold 全福庄地理探究助手。按下列 Skill 查证，以本轮 mode 和选择为准。\n\n" +
+            "你是 Landfold 元阳地理探究助手。按下列 Skill 查证，以本轮 mode 和选择为准。\n\n" +
             skill +
             correction,
         },
@@ -181,43 +232,37 @@ export async function investigate({
       activeTools,
     );
     const calls = message.tool_calls ?? [];
-    if (!Array.isArray(calls) || calls.length > 6)
+    if (!Array.isArray(calls) || calls.length > 12)
       throw new Error("模型返回的工具请求超出范围。");
     if (calls.length === 0) {
-      const missingTool = !sampled
-        ? currentTool
-        : reference && !sampledReference
-          ? "sample_reference_transect"
-          : !requiredCitation()
-            ? "lookup_evidence"
-            : null;
-      if (missingTool) {
-        correction =
-          "\n本轮还需调用 " +
-          missingTool +
-          (recharge && missingTool === "lookup_evidence"
-            ? "，id 使用 recharge。"
-            : "。");
-        toolChoice = { type: "function", function: { name: missingTool } };
+      const missing = nextCheck();
+      if (missing) {
+        correction = "\n本轮还需调用 " + missing.name + missing.detail + "。";
+        toolChoice = { type: "function", function: { name: missing.name } };
         continue;
       }
-      const answer = message.content?.trim();
-      if (!answer) throw new Error("模型没有返回解读。");
-      const ids = [...answer.matchAll(/\[([a-z]+)\]/g)].map(
+      const interpretation = message.content?.trim();
+      if (!interpretation) throw new Error("模型没有返回解读。");
+      const ids = [...interpretation.matchAll(/\[([a-z]+)\]/g)].map(
         (match) => match[1],
       );
       if (
         !ids.length ||
         ids.some((id) => !citations.has(id)) ||
-        (recharge && !ids.includes("recharge"))
+        requiredSources.some((id) => !ids.includes(id))
       ) {
         correction =
           "\n请引用本轮工具实际返回的资料 ID。可用 ID：" +
           [...citations.keys()].map((id) => "[" + id + "]").join("、") +
-          (recharge ? "。月份数值需要引用 [recharge]。" : "。");
+          (requiredSources.length
+            ? "。本轮必引资料：" +
+              requiredSources.map((id) => "[" + id + "]").join("、") + "。"
+            : "。");
         toolChoice = "none";
         continue;
       }
+      const answer = [formatCurrentReadings(mode, readings), interpretation]
+        .filter(Boolean).join("\n\n");
       turn.push({ role: "assistant", content: answer });
       return { turn, answer, citations: [...citations.values()], trace };
     }
@@ -232,34 +277,41 @@ export async function investigate({
     for (const call of calls) {
       const name = call.function?.name;
       let result = { error: "工具名称或参数无效。" };
-      if (name === "compare_recharge_months" && recharge) {
+      if (name === "compare_recharge_months" && useRecharge) {
         result = {
           ...compareRecharge(months),
           sourceEvidenceId: "recharge",
           unit: "月度补给占比为百分比，变化为百分点。",
           limit: rechargeSource.limit,
         };
-        sampled = true;
-        trace.push({
+        if (!readings.has(name)) trace.push({
           name: "比较水源补给",
           detail: months.map(monthLabel).join(" / "),
         });
-      } else if (name === "sample_current_transect" && !recharge) {
+        readings.set(name, result);
+      } else if (name === "read_terrain_profile" && useTerrain) {
+        result = readTerrain(terrain);
+        if (!readings.has(name)) trace.push({
+          name: "读取区域地形",
+          detail: result.label + " · 第 " + result.pointNumber + " 点",
+        });
+        readings.set(name, result);
+      } else if (name === "sample_current_transect" && useMap) {
         result = traceLine(points);
-        sampled = true;
-        trace.push({
+        if (!readings.has(name)) trace.push({
           name: "读取当前选线",
           detail: result.count + " 个采样点",
         });
-      } else if (name === "sample_reference_transect" && !recharge) {
+        readings.set(name, result);
+      } else if (name === "sample_reference_transect" && useMap) {
         result = { error: "本轮没有固定对照线。" };
         if (reference) {
           result = traceLine(reference);
-          sampledReference = true;
-          trace.push({
+          if (!readings.has(name)) trace.push({
             name: "读取对照线",
             detail: result.count + " 个采样点",
           });
+          readings.set(name, result);
         }
       } else if (name === "lookup_evidence") {
         let id;
@@ -268,8 +320,9 @@ export async function investigate({
         } catch {}
         if (typeof id === "string" && Object.hasOwn(evidence, id)) {
           result = { id, ...evidence[id] };
+          if (!citations.has(id))
+            trace.push({ name: "查阅资料", detail: result.title });
           citations.set(id, result);
-          trace.push({ name: "查阅资料", detail: result.title });
         }
       }
       turn.push({
@@ -278,9 +331,8 @@ export async function investigate({
         content: JSON.stringify(result),
       });
     }
-    const ready =
-      sampled && (!reference || sampledReference) && requiredCitation();
-    toolChoice = ready && round >= 3 ? "none" : "auto";
+    const ready = !nextCheck();
+    toolChoice = ready && (mode === "combined" || round >= 3) ? "none" : "auto";
     correction = ready
       ? "\n本轮已取得基础证据。若当前问题需要另一资料，可继续查阅。使用已有工具结果，避免重复调用。"
       : "";

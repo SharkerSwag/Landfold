@@ -121,6 +121,41 @@ footer {
 .page-title {
   padding-block: 28px 24px;
 }
+.case-start {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+  margin-bottom: 24px;
+  padding: 18px 20px;
+  border: 1px solid #d9e0dc;
+  border-left: 3px solid #245b46;
+}
+.case-start h2 {
+  margin: 0;
+  font-size: 1.12rem;
+}
+.case-start p {
+  margin: 5px 0 0;
+}
+.case-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.include-both {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-block: 10px;
+}
+.include-both input {
+  margin: 0;
+}
+.turn-line + .turn-line {
+  margin-inline-start: 8px;
+}
 .page-title p {
   color: var(--muted);
   font-size: 0.9rem;
@@ -154,8 +189,51 @@ footer {
 }
 .view-switch {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 14px;
+}
+.terrain #terrain-summary {
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+#terrain-chart {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  overflow: visible;
+}
+.terrain-grid {
+  stroke: #d9e0dc;
+}
+.terrain-ticks {
+  fill: #495a52;
+  font-size: 17px;
+}
+.terrain-fill {
+  fill: #e4efe7;
+}
+.terrain-profile-line {
+  fill: none;
+  stroke: #245b46;
+  stroke-width: 2.25;
+  stroke-linejoin: round;
+}
+#terrain-guide {
+  stroke: #495a52;
+  stroke-dasharray: 4 4;
+}
+#terrain-chart circle {
+  fill: #143b30;
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+.terrain-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 12px;
+  font-size: 0.82rem;
 }
 .month-fields {
   display: flex;
